@@ -11,7 +11,7 @@ plt.rcParams['font.serif'] = ['Times New Roman']
 plt.rcParams['font.size'] = 20
 
 
-epsilon = [1, 5, 10]
+epsilon = [1, 2, 10]
 
 # Parameters for the Laplace distribution
 mu = 0  # Location parameter

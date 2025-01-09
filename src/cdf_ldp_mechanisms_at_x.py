@@ -1,0 +1,112 @@
+import numpy as np
+from scipy.stats import laplace
+
+pi = np.pi
+exp = np.e
+
+class CDFAtX:
+    def __init__(self, epsilon, x):
+        self.epsilon = epsilon
+        self.discretization_level = 100
+        assert 0 <= x <= 1
+        self.x = x
+        self.bin_num = 100
+
+
+    def pm(self):
+        # PDF of the piecewise mechanism
+        C = (exp ** (self.epsilon / 2) - 1) / (2 * exp ** self.epsilon - 2)
+        p = exp ** (self.epsilon / 2)
+        if 0 <= self.x < C:
+            l, r = 0, 2 * C
+        elif 1 - C <= self.x <= 1:
+            l, r = 1 - 2 * C, 1
+        else:
+            l, r = self.x - C, self.x + C
+        # p and endpoints list
+        p_list = [p / exp ** self.epsilon, p, p / exp ** self.epsilon]
+        length_list = [0, l, r, 1]
+
+        # CDF list of the piecewise mechanism
+        cdf_list = np.zeros(self.discretization_level)
+        for i in range(self.discretization_level):
+            theta = i / self.discretization_level
+            if 0 <= theta < length_list[1]:
+                cdf_list[i] = p_list[0] * theta
+            elif length_list[1] <= theta < length_list[2]:
+                cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (theta - length_list[1])
+            elif length_list[2] <= theta < length_list[3]:
+                cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (length_list[2] - length_list[1]) + p_list[2] * (theta - length_list[2])
+            else:
+                cdf_list[i] = 1
+        return cdf_list
+
+    def laplace(self):
+        # CDF of the Laplace mechanism
+        mu = self.x
+        b = 1 / self.epsilon
+        theta = np.linspace(0, 1, self.discretization_level)
+        cdf_list = laplace.cdf(theta, mu, b)
+        return cdf_list
+
+    def sw(self):
+        # PDF of the square wave mechanism
+        p = (exp ** self.epsilon - 1) / self.epsilon
+        C = (exp ** self.epsilon * (self.epsilon - 1) + 1) / (2 * (exp ** self.epsilon - 1) ** 2)
+        if 0 <= self.x < C:
+            l, r = 0, 2 * C
+        elif 1 - C <= self.x <= 1:
+            l, r = 1 - 2 * C, 1
+        else:
+            l, r = self.x - C, self.x + C
+        # p and endpoints list
+        p_list = [p / exp ** self.epsilon, p, p / exp ** self.epsilon]
+        length_list = [0, l, r, 1]
+
+        # CDF list of the square wave mechanism
+        cdf_list = np.zeros(self.discretization_level)
+        for i in range(self.discretization_level):
+            theta = i / self.discretization_level
+            if 0 <= theta < length_list[1]:
+                cdf_list[i] = p_list[0] * theta
+            elif length_list[1] <= theta < length_list[2]:
+                cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (theta - length_list[1])
+            elif length_list[2] <= theta < length_list[3]:
+                cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (length_list[2] - length_list[1]) + p_list[2] * (theta - length_list[2])
+            else:
+                cdf_list[i] = 1
+        return cdf_list
+
+    def exp_l1(self, bin_num=100):
+        # score function array
+        score_array = np.zeros(bin_num)
+        for i in range(bin_num):
+            score_array[i] = - abs(self.x - i / bin_num)
+        sensitivity = 0.5
+        # probability array
+        p_list = np.zeros(bin_num)
+        for i in range(bin_num):
+            p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
+        p_list = p_list / sum(p_list)
+        # CDF list of the exponential mechanism
+        cdf_list = np.zeros(bin_num)
+        for i in range(bin_num):
+            cdf_list[i] = sum(p_list[:i + 1])
+        return cdf_list
+
+    def exp_l2(self, bin_num=100):
+        # score function array
+        score_array = np.zeros(bin_num)
+        for i in range(bin_num):
+            score_array[i] = - abs(self.x - i / bin_num) ** 2
+        sensitivity = 0.5
+        # probability array
+        p_list = np.zeros(bin_num)
+        for i in range(bin_num):
+            p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
+        p_list = p_list / sum(p_list)
+        # CDF list of the exponential mechanism
+        cdf_list = np.zeros(bin_num)
+        for i in range(bin_num):
+            cdf_list[i] = sum(p_list[:i + 1])
+        return cdf_list

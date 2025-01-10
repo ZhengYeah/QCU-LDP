@@ -3,8 +3,8 @@ import torch.nn as nn
 
 def generate_data(n=1000):
     X = torch.rand(n, 2)
-    # circle boundary (x+1)^2 + (y+1)^2 = 4(log(2) + 1)
-    y = (((X[:, 0] + 1) ** 2 + (X[:, 1] + 1) ** 2) < 4 * (torch.log(torch.tensor(2.0)) + 1)).long()
+    # circle boundary x_1^2 + x_2^2 = 1
+    y = ((X[:, 0]**2 + X[:, 1]**2) < 1).long()
     return X, y
 
 def ffnn(input_size=2, hidden_size=2, output_size=2):

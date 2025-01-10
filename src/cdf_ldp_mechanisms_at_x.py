@@ -7,10 +7,10 @@ exp = np.e
 class CDFAtX:
     def __init__(self, epsilon, x):
         self.epsilon = epsilon
-        self.discretization_level = 100
+        self.discretization_level = 500
         assert 0 <= x <= 1
         self.x = x
-        self.bin_num = 100
+        self.bin_num = 256
 
 
     def pm(self):
@@ -77,36 +77,49 @@ class CDFAtX:
                 cdf_list[i] = 1
         return cdf_list
 
-    def exp_l1(self, bin_num=100):
+    def exp_abs(self):
         # score function array
-        score_array = np.zeros(bin_num)
-        for i in range(bin_num):
-            score_array[i] = - abs(self.x - i / bin_num)
+        score_array = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
+            score_array[i] = - abs(self.x - i / self.bin_num)
         sensitivity = 0.5
         # probability array
-        p_list = np.zeros(bin_num)
-        for i in range(bin_num):
+        p_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
             p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
         p_list = p_list / sum(p_list)
         # CDF list of the exponential mechanism
-        cdf_list = np.zeros(bin_num)
-        for i in range(bin_num):
+        cdf_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
             cdf_list[i] = sum(p_list[:i + 1])
         return cdf_list
 
-    def exp_l2(self, bin_num=100):
+    def exp_square(self):
         # score function array
-        score_array = np.zeros(bin_num)
-        for i in range(bin_num):
-            score_array[i] = - abs(self.x - i / bin_num) ** 2
+        score_array = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
+            score_array[i] = - abs(self.x - i / self.bin_num) ** 2
         sensitivity = 0.5
         # probability array
-        p_list = np.zeros(bin_num)
-        for i in range(bin_num):
+        p_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
             p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
         p_list = p_list / sum(p_list)
         # CDF list of the exponential mechanism
-        cdf_list = np.zeros(bin_num)
-        for i in range(bin_num):
+        cdf_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
             cdf_list[i] = sum(p_list[:i + 1])
+        return cdf_list
+
+    def krr(self):
+        # pdf list
+        p = exp ** self.epsilon / ((self.bin_num - 1) + (exp ** self.epsilon))
+        pdf_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
+            index = self.x * self.bin_num
+            pdf_list[i] = p if i == index else p / exp ** self.epsilon
+        # cdf list
+        cdf_list = np.zeros(self.bin_num)
+        for i in range(self.bin_num):
+            cdf_list[i] = sum(pdf_list[:i + 1])
         return cdf_list

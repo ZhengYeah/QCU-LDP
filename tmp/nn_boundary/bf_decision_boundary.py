@@ -1,5 +1,13 @@
 import torch
-import torch.nn as nn
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
+
+# Enable LaTeX interpreter
+plt.rcParams['text.usetex'] = True
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['font.serif'] = ['Times New Roman']
+plt.rcParams['font.size'] = 20
+
 
 # load the model
 model = torch.load('ffnn.pth')
@@ -23,12 +31,14 @@ with torch.no_grad():
 pred = pred.view(xx.size()).numpy()
 
 # plot the decision boundary
-import matplotlib.pyplot as plt
 plt.figure(figsize=(8, 8))
 plt.contourf(xx.numpy(), yy.numpy(), pred, cmap='coolwarm', alpha=0.5)
 # emphisize the decision boundary
 plt.contour(xx.numpy(), yy.numpy(), pred, levels=[0.5], colors='black', linestyles='--')
-plt.xlabel('X1')
-plt.ylabel('X2')
 plt.title('Decision Boundary')
+# Remove ending zeros in the ticks
+ax = plt.gca()
+ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
+plt.savefig('./decision_boundary.pdf')
 plt.show()

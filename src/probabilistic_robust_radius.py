@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import math
 
 
 class ProbabilisticRobustRadius(nn.Module):
@@ -13,8 +14,9 @@ class ProbabilisticRobustRadius(nn.Module):
         self.correct_class = self.model(self.x.unsqueeze(0)).argmax(dim=1)
 
     def robust_testing(self, radius):
+        print(f"Testing radius {radius}")
         # hoeffding bound
-        sample_num = torch.log(2 / self.omega) / (2 * self.tau ** 2)
+        sample_num = math.log(2 / self.omega) / (2 * self.tau ** 2)
         sample_num = int(sample_num)
         samples = torch.rand(sample_num, self.x.dim())
         samples = samples * radius + self.x

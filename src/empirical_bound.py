@@ -26,15 +26,25 @@ class EmpiricalBound(nn.Module):
                 one_sample = [PiecewiseMechanism(x, epsilon).linear_perturbation() for x in private_values]
                 samples.append(one_sample)
         elif mechanism == "sw":
-            samples = [PiecewiseMechanism(x, epsilon).sw_linear() for x in private_values]
+            for _ in range(sample_num):
+                one_sample = [PiecewiseMechanism(x, epsilon).sw_linear() for x in private_values]
+                samples.append(one_sample)
         elif mechanism == "krr":
-            samples = [DiscreteMechanism(x, epsilon, 256).krr() for x in private_values]
+            for _ in range(sample_num):
+                one_sample = [DiscreteMechanism(x, epsilon, 256).krr() for x in private_values]
+                samples.append(one_sample)
         elif mechanism == "exp":
-            samples = [DiscreteMechanism(x, epsilon, 256).exp_mechanism_loc([0, 1]) for x in private_values]
+            for _ in range(sample_num):
+                one_sample = [DiscreteMechanism(x, epsilon, 256).exp_mechanism_loc([0, 1]) for x in private_values]
+                samples.append(one_sample)
         elif mechanism == "laplace":
-            samples = [NoiseAddingMechanism(x, epsilon).laplace_mechanism() for x in private_values]
+            for _ in range(sample_num):
+                one_sample = [NoiseAddingMechanism(x, epsilon).laplace_mechanism() for x in private_values]
+                samples.append(one_sample)
         elif mechanism == "gaussian":
-            samples = [NoiseAddingMechanism(x, epsilon).gaussian_mechanism() for x in private_values]
+            for _ in range(sample_num):
+                one_sample = [NoiseAddingMechanism(x, epsilon).gaussian_mechanism() for x in private_values]
+                samples.append(one_sample)
 
         assert len(samples) == sample_num
         return torch.tensor(samples)

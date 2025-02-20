@@ -88,15 +88,14 @@ class ProbabilisticRobustRadius(nn.Module):
         # True if the robustness rectangle is valid
         return 1 - correct_num / sample_num <= self.tau
 
-    def adjust_step_rate(self, step_size=0.1, rate=0.5, tol=1e-2):
+    def adjust_step_rate(self, list_step_and_rate):
         """
         Adjust the step size and rate for the rectangle
         """
-        list_step_and_rate = [(0.2, 0.3), (0.1, 0.5), (0.05, 0.5), (0.02, 0.5)]
+        assert len(list_step_and_rate[0]) == 2
         for step, rate in list_step_and_rate:
             for _ in range(100):
                 rect = self.form_hyper_rectangle(step, rate)
                 if self.robust_testing_rectangle(rect):
                     return rect
         print(f"Cannot find a valid rectangle")
-

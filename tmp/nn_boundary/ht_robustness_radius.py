@@ -1,5 +1,5 @@
 import torch
-from src.probabilistic_robust_radius import ProbabilisticRobustRadius
+from src.robust_radius_torch import ProbabilisticRobustRadius
 
 # load the model
 model = torch.load('ffnn.pth')

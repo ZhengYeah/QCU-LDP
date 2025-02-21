@@ -13,3 +13,4 @@ model = joblib.load('classifiers/bank_rf.pkl')
 robust_rec = RobustRadiusSKLearn(model, x_df, ['Age','EstimatedSalary'], 0.05, 0.1)
 radius = robust_rec.binary_search()
 print(f"Robust radius: {radius}")
+

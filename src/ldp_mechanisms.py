@@ -84,34 +84,29 @@ class DiscreteMechanism:
         else:
             return self.private_val
 
-    def exp_mechanism_loc(self, location_list: "list"):
+    def exp_abs(self) -> "float":
         """
-        the exponential mechanism for location perturbation
+        the exponential mechanism with absolute score function
+        :return: perturbed value in [0,1]
         """
-        length = len(location_list)
-        # corner case: only one location -> sensitivity is inf
-        if length == 1:
-            return location_list[0]
         # score function array
-        score_array = np.zeros(length)
-        for i in range(length):
-            score_array[i] = -np.linalg.norm(np.array(location_list[i]) - np.array(self.private_val))
-        sensitivity = max(score_array) - min(score_array)
+        score_array = np.zeros(self.total_num)
+        for i in range(self.total_num):
+            score_array[i] = - abs(self.private_val - i / self.total_num)
+        sensitivity = 0.5
         # probability array
-        p = np.zeros(length)
-        for i in range(length):
-            p[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
-        p = p / sum(p)
-        assert abs(sum(p) - 1) < 1e-3
+        p_list = np.zeros(self.total_num)
+        for i in range(self.total_num):
+            p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
+        p_list = p_list / sum(p_list)
         # sample
         tmp = random.uniform(0, 1)
         index_perturbed = None
-        for i in range(length):
-            if tmp <= sum(p[:i + 1]):
+        for i in range(self.total_num):
+            if tmp <= sum(p_list[:i + 1]):
                 index_perturbed = i
                 break
-        return location_list[index_perturbed]
-
+        return index_perturbed / self.total_num
 
 class NoiseAddingMechanism:
     def __init__(self, private_val, epsilon):
@@ -120,7 +115,7 @@ class NoiseAddingMechanism:
 
     def laplace_mechanism(self) -> "float":
         """
-        the Laplace mechanism
+        the Laplace mechanism + truncation
         """
         assert 0 <= self.private_val <= 1 + 1e-6
         b = 1 / self.epsilon
@@ -131,6 +126,20 @@ class NoiseAddingMechanism:
             return 1
         else:
             return sampled
+
+    def laplace_with_fail(self) -> ("float", "int"):
+        """
+        the Laplace mechanism with failure
+        fail_num: the number of failures, used to compare with the theoretical failure rate
+        """
+        assert 0 <= self.private_val <= 1 + 1e-6
+        fail_num = 0
+        b = 1 / self.epsilon
+        sampled = self.private_val + np.random.laplace(0, b)
+        while sampled < 0 or sampled > 1:
+            fail_num += 1
+            sampled = self.private_val + np.random.laplace(0, b)
+        return sampled, fail_num
 
     def gaussian_mechanism(self) -> "float":
         """

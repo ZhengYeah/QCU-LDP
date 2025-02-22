@@ -27,12 +27,18 @@ def samples_of_mechanism(private_values, sample_num, mechanism, epsilon):
             samples[i] = one_sample
     elif mechanism == "exp":
         for i in range(sample_num):
-            one_sample = [DiscreteMechanism(x, epsilon, 256).exp_mechanism_loc([0, 1]) for x in private_values]
+            one_sample = [DiscreteMechanism(x, epsilon, 256).exp_abs() for x in private_values]
             samples[i] = one_sample
     elif mechanism == "laplace":
+        fail_num = 0
         for i in range(sample_num):
-            one_sample = [NoiseAddingMechanism(x, epsilon).laplace_mechanism() for x in private_values]
-            samples[i] = one_sample
+            tmp = []
+            for x in private_values:
+                one_sample, fail = NoiseAddingMechanism(x, epsilon).laplace_with_fail()
+                tmp.append(one_sample)
+                fail_num += fail
+            samples[i] = tmp
+        return samples, fail_num
     elif mechanism == "gaussian":
         for i in range(sample_num):
             one_sample = [NoiseAddingMechanism(x, epsilon).gaussian_mechanism() for x in private_values]

@@ -14,11 +14,11 @@ epsilon = 4
 x = 0.5
 
 cdf_at_x = CDFAtX(epsilon, x)
-cdf_pm = cdf_at_x.pm()
-cdf_laplace = cdf_at_x.laplace()
-cdf_sw = cdf_at_x.sw()
-cdf_exp_l1 = cdf_at_x.exp_abs()
-cdf_krr = cdf_at_x.krr()
+cdf_pm = cdf_at_x._pm()
+cdf_laplace = cdf_at_x._laplace()
+cdf_sw = cdf_at_x._sw()
+cdf_exp_l1 = cdf_at_x._exp_abs()
+cdf_krr = cdf_at_x._krr()
 index_multiplier_continuous = cdf_at_x.discretization_level
 index_multiplier_discrete = cdf_at_x.bin_num
 

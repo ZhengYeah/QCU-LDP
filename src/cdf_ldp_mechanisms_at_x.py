@@ -6,25 +6,54 @@ pi = np.pi
 exp = np.e
 
 class CDFAtX:
-    def __init__(self, epsilon, x):
+    def __init__(self, epsilon, x, bin_num=256):
         self.epsilon = epsilon
         self.discretization_level = 500
         assert 0 <= x <= 1
         self.x = x
-        self.bin_num = 256
+        self.bin_num = bin_num
 
-    def cdf_of_tilde_x(self, rectangle, cdf_list):
+    def cdf_of_tilde_x(self, rectangle, mechanism):
         """
-        Compute the CDF of the rectangle region
+        Compute the CDF of the rectangle region of the mechanism
         :param rectangle: (lower, upper) of the rectangle (1-dimension)
+        :param mechanism: (str) the mechanism name
         :return: (float) CDF of the rectangle region
         """
-        left_index = math.floor(rectangle[0] * self.discretization_level)
-        right_index = math.floor(rectangle[1] * self.discretization_level)
-        right_index = min(right_index, self.discretization_level - 1)  # avoid out of range
+        cdf_list = self._cdf_of_mechanism(mechanism)
+        if mechanism in ["pm", "sw", "laplace"]:
+            left_index = math.floor(rectangle[0] * self.discretization_level)
+            right_index = math.floor(rectangle[1] * self.discretization_level)
+            right_index = min(right_index, self.discretization_level - 1)  # avoid out of range
+        else:
+            left_index = math.floor(rectangle[0] * self.bin_num)
+            right_index = math.floor(rectangle[1] * self.bin_num)
+            right_index = min(right_index, self.bin_num - 1)
         return cdf_list[right_index] - cdf_list[left_index]
 
-    def pm(self):
+    def _cdf_of_mechanism(self, mechanism):
+        """
+        Parser of the CDF of the mechanism
+        :param mechanism: (str) the mechanism name
+        :return: (np.ndarray) the CDF list
+        """
+        assert mechanism in ["pm", "sw", "krr", "exp", "laplace"]
+        if mechanism == "pm":
+            return self._pm()
+        elif mechanism == "sw":
+            return self._sw()
+        elif mechanism == "krr":
+            return self._krr()
+        elif mechanism == "exp":
+            return self._exp_abs()
+        elif mechanism == "exp_square":
+            return self._exp_square()
+        elif mechanism == "laplace":
+            return self._laplace()
+        else:
+            raise ValueError("Invalid mechanism name")
+
+    def _pm(self):
         # PDF of the piecewise mechanism
         C = (exp ** (self.epsilon / 2) - 1) / (2 * exp ** self.epsilon - 2)
         p = exp ** (self.epsilon / 2)
@@ -52,7 +81,7 @@ class CDFAtX:
                 cdf_list[i] = 1
         return cdf_list
 
-    def laplace(self):
+    def _laplace(self):
         # CDF of the Laplace mechanism
         mu = self.x
         b = 1 / self.epsilon
@@ -60,7 +89,7 @@ class CDFAtX:
         cdf_list = laplace.cdf(theta, mu, b)
         return cdf_list
 
-    def sw(self):
+    def _sw(self):
         # PDF of the square wave mechanism
         p = (exp ** self.epsilon - 1) / self.epsilon
         C = (exp ** self.epsilon * (self.epsilon - 1) + 1) / (2 * (exp ** self.epsilon - 1) ** 2)
@@ -88,7 +117,7 @@ class CDFAtX:
                 cdf_list[i] = 1
         return cdf_list
 
-    def exp_abs(self):
+    def _exp_abs(self):
         # score function array
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
@@ -105,7 +134,7 @@ class CDFAtX:
             cdf_list[i] = sum(p_list[:i + 1])
         return cdf_list
 
-    def exp_square(self):
+    def _exp_square(self):
         # score function array
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
@@ -122,7 +151,7 @@ class CDFAtX:
             cdf_list[i] = sum(p_list[:i + 1])
         return cdf_list
 
-    def krr(self):
+    def _krr(self):
         # pdf list
         p = exp ** self.epsilon / ((self.bin_num - 1) + (exp ** self.epsilon))
         pdf_list = np.zeros(self.bin_num)

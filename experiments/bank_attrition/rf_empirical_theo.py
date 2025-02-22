@@ -14,29 +14,30 @@ x_df = pd.DataFrame(data=[user_row],
                              'EstimatedSalary', 'Satisfaction Score', 'Point Earned'])
 model = joblib.load('classifiers/bank_rf.pkl')
 
-epsilon = 4
 
-def theoretical_accuracy():
+def robust_rect_rf():
     robust_rec = RobustRadiusSKLearn(model, x_df, ['Age','EstimatedSalary'], 0.05, 0.1)
     radius = robust_rec.binary_search()
-    robust_rectangle = robust_rec.adjust_step_rate([(0.4, 0.5), (0.3, 0.5), (0.2, 0.5), (0.1, 0.5), (0.05, 0.5)])
-    # robust_rectangle = robust_rec.adjust_step_rate([(0.2, 0.5), (0.1, 0.5), (0.05, 0.5)])
+    robust_rectangle = robust_rec.adjust_step_rate([(0.4, 0.5), (0.3, 0.5), (0.2, 0.5)])
+    robust_rectangle = robust_rec.adjust_step_rate([(0.2, 0.5), (0.2, 0.5), (0.05, 0.5)])
+    return robust_rectangle
 
+def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     # compute the theoretical accuracy
     prob_accumulated = 1
     for i, private_value in enumerate(private_values):
-        cdf_at_x = CDFAtX(epsilon=epsilon, x=private_value)
-        cdf_list = cdf_at_x.pm()
+        cdf_at_x = CDFAtX(epsilon, private_value, bin_num=100)
         rectangle = [robust_rectangle[0][i], robust_rectangle[1][i]]
-        cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, cdf_list)
+        cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
         prob_accumulated *= cdf_rect
     return prob_accumulated
 
 
-def empirical_accuracy(sample_num=1000):
-    mechanism = "pm"
-
-    samples = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
+def empirical_accuracy(epsilon, sample_num=1000, mechanism="pm"):
+    if mechanism == "laplace":
+        samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
+    else:
+        samples = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
 
     perturbed_age = samples[:,0]
     perturbed_salary = samples[:,1]
@@ -53,12 +54,25 @@ def empirical_accuracy(sample_num=1000):
     # feed to the trained model
     ground_truth = model.predict(x_df)
     pred = model.predict(perturbed_df)
-
     # calculate the empirical accuracy
-    accuracy = np.sum(ground_truth == pred) / sample_num
+    if mechanism == "laplace":
+        accuracy = np.sum(ground_truth == pred) / (sample_num + fail_num_laplace)
+    else:
+        accuracy = np.sum(ground_truth == pred) / sample_num
     return accuracy
 
 
 if __name__ == '__main__':
-    print(f"Theoretical accuracy: {theoretical_accuracy()}")
-    print(f"Empirical accuracy: {empirical_accuracy()}")
+    robust_rectangle = robust_rect_rf()
+
+    # write the theoretical and empirical accuracy to csv file
+    with open('rf_accuracy.csv', 'w') as f:
+        f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical\n')
+        for epsilon in range(1, 11):
+            f.write(f'{epsilon},')
+            for mechanism in ["pm", "sw", "krr", "exp", "laplace"]:
+                prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
+                accuracy = empirical_accuracy(epsilon, mechanism=mechanism)
+                f.write(f'{prob_accumulated:.6f},{accuracy:.3f},')
+            f.write('\n')
+

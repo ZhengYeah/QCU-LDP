@@ -124,4 +124,5 @@ class RobustRadiusSKLearn:
                     if np.sum(rect[1] - rect[0]) > np.sum(best_rect[1] - best_rect[0]):
                         best_rect = rect
                         self.robust_hyper_rectangle = rect
+        print(f"Best rectangle: {best_rect}")
         return best_rect

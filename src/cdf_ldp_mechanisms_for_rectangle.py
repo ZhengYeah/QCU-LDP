@@ -1,28 +1,23 @@
 import numpy as np
 from scipy.stats import laplace
-import math
 
 pi = np.pi
 exp = np.e
 
-class CDFAtX:
-    def __init__(self, epsilon, x):
+class CDFForRectangle:
+    def __init__(self, epsilon, x, rectangle):
+        """
+        :param epsilon: privacy parameter
+        :param rectangle: one-dimensional rectangle
+        """
         self.epsilon = epsilon
         self.discretization_level = 500
         assert 0 <= x <= 1
         self.x = x
+        assert 0 <= rectangle[0] <= 1 and 0 <= rectangle[1] <= 1
+        self.rectangle = rectangle
         self.bin_num = 256
 
-    def cdf_of_tilde_x(self, rectangle, cdf_list):
-        """
-        Compute the CDF of the rectangle region
-        :param rectangle: (lower, upper) of the rectangle (1-dimension)
-        :return: (float) CDF of the rectangle region
-        """
-        left_index = math.floor(rectangle[0] * self.discretization_level)
-        right_index = math.floor(rectangle[1] * self.discretization_level)
-        right_index = min(right_index, self.discretization_level - 1)  # avoid out of range
-        return cdf_list[right_index] - cdf_list[left_index]
 
     def pm(self):
         # PDF of the piecewise mechanism

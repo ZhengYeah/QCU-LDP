@@ -7,7 +7,8 @@ import numpy as np
 
 # private features: age (index 1), salary (index 6)
 # choose a user from the dataset as x
-user_row = [619,0.22,2,0.0,1,1,0.4067444,2,464]
+user_row = [619,0.22,2,0.0,1,1,0.3067444,2,464]
+# user_row = [653,0.58,1,132602.88,1,0,0.02548835,2,163]
 model = joblib.load('../experiments/bank_attrition/classifiers/bank_rf.pkl')
 
 def test_decision_boundary():
@@ -50,4 +51,3 @@ def test_robust_rect():
     refined_rec = robust_rec.adjust_step_rate([(0.1, 0.5), (0.05, 0.5)])
     print(f"Founded robust rectangle: {founded_rec}")
     print(f"Refined robust rectangle: {refined_rec}")
-

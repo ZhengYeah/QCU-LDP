@@ -73,24 +73,20 @@ class RobustRadiusSKLearn:
         return upper
 
     # finding a robust hyper rectangle
-    def _form_hyper_rectangle(self, step_size, rate):
+    def _form_hyper_rectangle(self, initial_rect, step_size, rate):
         """
         Find a robust hyper rectangle (randomized algorithm)
         """
-        assert self.robust_radius is not None
-        # initialize the rectangle, shape: [[lower_1, lower_2, ...], [upper_1, upper_2, ...]]
-        # NOTE: Do not forget deepcopy, otherwise the original clipped_robust_area will be changed
-        rect = deepcopy(self.clipped_robust_area)
-
+        assert initial_rect is not None
         # sample the direction and add step_size
         left_direction = np.random.binomial(1, rate, len(self.perturb_col))
         right_direction = np.random.binomial(1, rate, len(self.perturb_col))
         # update the rectangle
         # assert len(left_direction) == len(right_direction) == len(self.perturb_col)
-        rect[0] = rect[0] - left_direction * step_size
-        rect[1] = rect[1] + right_direction * step_size
+        initial_rect[0] = initial_rect[0] - left_direction * step_size
+        initial_rect[1] = initial_rect[1] + right_direction * step_size
         # clip the rectangle
-        clipped_rect = [np.clip(x, 0, 1) for x in rect]
+        clipped_rect = [np.clip(x, 0, 1) for x in initial_rect]
         return clipped_rect
 
     def _robust_testing_rectangle(self, rect):
@@ -116,13 +112,16 @@ class RobustRadiusSKLearn:
         For better accuracy, this function can be called multiple times
         """
         assert len(list_step_and_rate[0]) == 2
+        # initialize the rectangle, shape: [[lower_1, lower_2, ...], [upper_1, upper_2, ...]]
         best_rect = deepcopy(self.robust_hyper_rectangle)
         for step, rate in list_step_and_rate:
             for _ in range(100):
-                rect = self._form_hyper_rectangle(step, rate)
+                # NOTE: Do not forget deepcopy, otherwise the original robust_hyper_rect will be changed
+                initial_rect = deepcopy(best_rect)
+                rect = self._form_hyper_rectangle(initial_rect, step, rate)
                 if self._robust_testing_rectangle(rect):
                     if np.sum(rect[1] - rect[0]) > np.sum(best_rect[1] - best_rect[0]):
                         best_rect = rect
-                        self.robust_hyper_rectangle = rect
+        self.robust_hyper_rectangle = best_rect
         print(f"Best rectangle: {best_rect}")
         return best_rect

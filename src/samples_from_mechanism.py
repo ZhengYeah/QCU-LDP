@@ -27,7 +27,9 @@ def samples_of_mechanism(private_values, sample_num, mechanism, epsilon):
             samples[i] = one_sample
     elif mechanism == "exp":
         for i in range(sample_num):
-            one_sample = [DiscreteMechanism(x, epsilon, 256).exp_abs() for x in private_values]
+            # the number of bins is 100 for normal [0, 1] feature
+            # for image data, the number of bins is 256, considering the pixel value range
+            one_sample = [DiscreteMechanism(x, epsilon, 100).exp_abs() for x in private_values]
             samples[i] = one_sample
     elif mechanism == "laplace":
         fail_num = 0

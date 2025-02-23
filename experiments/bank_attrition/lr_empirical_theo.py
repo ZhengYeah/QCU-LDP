@@ -6,14 +6,14 @@ import pandas as pd
 import joblib
 
 # private features: age (index 1), salary (index 6)
-# choose the last user from the dataset as x
-user_row = [619,0.22,2,0.0,1,1,0.5067444,2,464]
+# choose a user from the dataset as x
+user_row = [0.619,0.22,0.2,0.0,0.25,1.0,0.5067444,0.4,0.464]
 
 private_values = [user_row[1], user_row[6]] # age, salary
 x_df = pd.DataFrame(data=[user_row],
                     columns=['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'IsActiveMember',
                              'EstimatedSalary', 'Satisfaction Score', 'Point Earned'])
-model = joblib.load('classifiers/bank_rf.pkl')
+model = joblib.load('classifiers/bank_lr.pkl')
 
 
 def robust_rect_rf():
@@ -34,7 +34,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     return prob_accumulated
 
 
-def empirical_accuracy(epsilon, sample_num=5000, mechanism="pm"):
+def empirical_accuracy(epsilon, sample_num=4000, mechanism="pm"):
     if mechanism == "laplace":
         samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
     else:
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     robust_rectangle = robust_rect_rf()
 
     # write the theoretical and empirical accuracy to csv file
-    with open('rf_accuracy.csv', 'w') as f:
+    with open('lr_accuracy.csv', 'w') as f:
         f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical\n')
         for epsilon in range(1, 9):
             f.write(f'{epsilon}')

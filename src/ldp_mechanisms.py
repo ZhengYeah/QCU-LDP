@@ -93,12 +93,14 @@ class DiscreteMechanism:
         score_array = np.zeros(self.total_num)
         for i in range(self.total_num):
             score_array[i] = - abs(self.private_val - i / self.total_num)
+        # sensitivity = max {|x-y|,|x-y'|} = 0.5
         sensitivity = 0.5
         # probability array
         p_list = np.zeros(self.total_num)
         for i in range(self.total_num):
             p_list[i] = exp ** (self.epsilon * score_array[i] / (2 * sensitivity))
         p_list = p_list / sum(p_list)
+        # assert abs(sum(p_list) - 1) < 1e-2
         # sample
         tmp = random.uniform(0, 1)
         index_perturbed = None

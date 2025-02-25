@@ -3,7 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 import pandas as pd
 
-df = pd.read_csv('processed_stroke_data.csv')
+df = pd.read_csv('processed_stroke_data_normalized.csv')
 X = df.drop(columns=['stroke'])
 y = df['stroke']
 

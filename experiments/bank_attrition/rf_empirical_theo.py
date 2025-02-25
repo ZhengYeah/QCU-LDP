@@ -70,7 +70,7 @@ if __name__ == '__main__':
             f.write(f'{epsilon}')
             for mechanism in ["pm", "sw", "krr", "exp", "laplace"]:
                 prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-                accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
+                accuracy = empirical_accuracy(epsilon, sample_num=5000, mechanism=mechanism)
                 f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
             f.write('\n')
 

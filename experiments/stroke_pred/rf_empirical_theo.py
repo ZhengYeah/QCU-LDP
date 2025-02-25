@@ -5,19 +5,19 @@ import numpy as np
 import pandas as pd
 import joblib
 
-# private features: age (index 1), salary (index 6)
-# choose a user from the dataset as x
-user_row = [0.619,0.22,0.2,0.0,0.25,1.0,0.5067444,0.4,0.464]
+# private features: age (index 0), bmi (index 5)
+# choose the last user from the dataset as x
+user_row = [0.79,1.0,0.0,1.0,0.5804,0.48]
+private_ind_1, private_ind_2 = 0, 5
 
-private_values = [user_row[1], user_row[6]] # age, salary
-x_df = pd.DataFrame(data=[user_row],
-                    columns=['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'IsActiveMember',
-                             'EstimatedSalary', 'Satisfaction Score', 'Point Earned'])
-model = joblib.load('classifiers/bank_lr.pkl')
+private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
+data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
+x_df = pd.DataFrame(data=[user_row], columns=data_columns)
+model = joblib.load('classifiers/stroke_rf.pkl')
 
 
 def robust_rect_rf():
-    robust_rec = RobustRadiusSKLearn(model, x_df, ['Age','EstimatedSalary'], 0.05, 0.05)
+    robust_rec = RobustRadiusSKLearn(model, x_df, ['age','bmi'], 0.05, 0.03)
     radius = robust_rec.binary_search()
     robust_rectangle = robust_rec.adjust_step_rate([(0.4, 0.5), (0.3, 0.5), (0.2, 0.5)])
     robust_rectangle = robust_rec.adjust_step_rate([(0.1, 0.5), (0.05, 0.5)])
@@ -34,7 +34,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     return prob_accumulated
 
 
-def empirical_accuracy(epsilon, sample_num=4000, mechanism="pm"):
+def empirical_accuracy(epsilon, sample_num=5000, mechanism="pm"):
     if mechanism == "laplace":
         samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
     else:
@@ -44,11 +44,12 @@ def empirical_accuracy(epsilon, sample_num=4000, mechanism="pm"):
     perturbed_salary = samples[:,1]
     # fill the perturbed rows with the original row
     perturbed_rows = user_row * np.ones((sample_num, len(user_row)))
-    perturbed_rows[:,1] = perturbed_age
-    perturbed_rows[:,6] = perturbed_salary
+    # NOTE: index 0 is age, index 5 is bmi
+    perturbed_rows[:,private_ind_1] = perturbed_age
+    perturbed_rows[:,private_ind_2] = perturbed_salary
     # form dataframes
     # CreditScore,Age,Tenure,Balance,NumOfProducts,IsActiveMember,EstimatedSalary,Exited,Satisfaction Score,Point Earned
-    perturbed_df = pd.DataFrame(data=perturbed_rows, columns=['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'IsActiveMember', 'EstimatedSalary', 'Satisfaction Score', 'Point Earned'])
+    perturbed_df = pd.DataFrame(data=perturbed_rows, columns=data_columns)
     # feed to the trained model
     ground_truth = model.predict(x_df)
     pred = model.predict(perturbed_df)
@@ -64,13 +65,13 @@ if __name__ == '__main__':
     robust_rectangle = robust_rect_rf()
 
     # write the theoretical and empirical accuracy to csv file
-    with open('lr_accuracy.csv', 'w') as f:
+    with open('rf_accuracy.csv', 'w') as f:
         f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical\n')
         for epsilon in range(1, 9):
             f.write(f'{epsilon}')
             for mechanism in ["pm", "sw", "krr", "exp", "laplace"]:
                 prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-                accuracy = empirical_accuracy(epsilon, sample_num=5000, mechanism=mechanism)
+                accuracy = empirical_accuracy(epsilon, sample_num=6000, mechanism=mechanism)
                 f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
             f.write('\n')
 

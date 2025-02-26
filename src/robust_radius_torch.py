@@ -1,11 +1,9 @@
-from copy import deepcopy
-
 import torch
 import torch.nn as nn
 import math
 from copy import deepcopy
 
-class ProbabilisticRobustRadius(nn.Module):
+class RobustRadiusTorch:
     def __init__(self, model, x, perturb_ind, omega, tau):
         """
         Find a robust vector for a given PyTorch model and input
@@ -15,16 +13,16 @@ class ProbabilisticRobustRadius(nn.Module):
         :param omega: confidence level
         :param tau: tolerance level
         """
-        assert isinstance(x, torch.Tensor) and len(x.shape) == 1
+        assert isinstance(x, torch.Tensor)
         assert isinstance(perturb_ind, list)
         assert isinstance(model, nn.Module)
-        super(ProbabilisticRobustRadius, self).__init__()
+        super(RobustRadiusTorch, self).__init__()
         self.model = model
         self.x = x
         # perturbation indexes
-        rows = [self.perturb_ind[i][0] for i in range(len(self.perturb_ind))]
-        cols = [self.perturb_ind[i][1] for i in range(len(self.perturb_ind))]
-        self.perturb_ind = zip(rows, cols)
+        rows = torch.tensor([perturb_ind[i][0] for i in range(len(perturb_ind))])
+        cols = torch.tensor([perturb_ind[i][1] for i in range(len(perturb_ind))])
+        self.perturb_ind = torch.stack((rows, cols), dim=0)
         self.omega = omega
         self.tau = tau
         self.correct_class = self.model(self.x.unsqueeze(0)).argmax(dim=1)
@@ -40,7 +38,7 @@ class ProbabilisticRobustRadius(nn.Module):
         """
         sample_num = math.log(2 / self.omega) / (2 * self.tau ** 2)
         sample_num = int(sample_num)
-        samples = torch.rand(sample_num, len(self.perturb_ind))
+        samples = torch.rand(sample_num, len(self.perturb_ind[0]))
         return samples, sample_num
 
     def _robust_testing_radius(self, radius):
@@ -48,16 +46,17 @@ class ProbabilisticRobustRadius(nn.Module):
         samples_01, sample_num = self._hoeffding_bound_sample()
         samples_pos_neg = samples_01 * 2 - 1
         # map the samples to the radius
-        assert samples_pos_neg.shape[1] == len(self.perturb_col)
+        assert samples_pos_neg.shape[1] == len(self.perturb_ind[0])
         # samples = samples_pos_neg * radius
         # add the perturbation to the corresponding dims
         samples = self.x.clone().detach()
-        samples = samples.repeat(sample_num, 1)
-        assert samples.shape[0] == sample_num
-        for row, col in enumerate(self.perturb_ind):
-            samples[:, row, col] = samples[:, row, col] + samples_pos_neg[:,:] * radius
+        # expand one dim to match the batch size
+        samples = samples.unsqueeze(0).repeat(sample_num, 1, 1)
+        assert samples.dim() == 3
+        row, col = self.perturb_ind[0], self.perturb_ind[1]
+        samples[:, row, col] = samples[:, row, col] + samples_pos_neg[:, :] * radius
         # clip the samples to the range [0, 1]
-        samples = torch.clamp(samples, 0, 1).unsqueeze(1)
+        samples = torch.clamp(samples, 0, 1)
         samples = samples.to(self.x.device)
         with torch.no_grad():
             predictions = self.model(samples)
@@ -74,7 +73,7 @@ class ProbabilisticRobustRadius(nn.Module):
                 upper = mid
         self.robust_radius = upper
         # shape of the clipped robust area (only perturbed dimensions), shape: [[lower_1, lower_2, ...], [upper_1, upper_2, ...]]
-        rows, cols = zip(*self.perturb_ind)
+        rows, cols = self.perturb_ind[0], self.perturb_ind[1]
         tmp_area = self.x[rows, cols] - upper, self.x[rows, cols] + upper
         # clip the area to [0, 1]
         self.clipped_robust_area = [torch.clamp(x, 0, 1) for x in tmp_area]

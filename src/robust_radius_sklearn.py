@@ -4,7 +4,7 @@ import pandas as pd
 from copy import deepcopy
 
 class RobustRadiusSKLearn:
-    def __init__(self, model, x, perturb_col, omega, tau, p=float('inf')):
+    def __init__(self, model, x, perturb_col, omega, tau):
         """
         Find a robust vector for a given scikit-learn model and input
         :param model: scikit-learn model
@@ -22,7 +22,6 @@ class RobustRadiusSKLearn:
         self.perturb_col = perturb_col
         self.omega = omega
         self.tau = tau
-        self.p = p
         self.correct_class = self.model.predict(self.x)[0]
         # robust radius and area
         self.robust_radius = None

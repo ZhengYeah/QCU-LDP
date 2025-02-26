@@ -4,13 +4,20 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 # Load the MNIST
-mnist_data = torchvision.datasets.MNIST('mnist_data/', download=False, train=True)
+mnist_data = torchvision.datasets.MNIST('mnist_data/', download=True, train=True)
 # transform each image to 14x14
 transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
     torchvision.transforms.Lambda(lambda x: torch.nn.functional.avg_pool2d(x, kernel_size=2, stride=2))
 ])
 
+if torch.cuda.is_available():
+    print(f"CUDA available, using GPU")
+    device = torch.device('cuda')
+else:
+    device = torch.device('cpu')
+
+# Define the data loader
 mnist_data.transform = transform
 data_loader = DataLoader(mnist_data, batch_size=100, shuffle=True)
 # Define the model
@@ -20,13 +27,15 @@ model = nn.Sequential(
     nn.ReLU(),
     nn.Linear(128, 10)
 )
+model.to(device)
 # Define the loss function
 criterion = nn.CrossEntropyLoss()
 # Define the optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 # Train the model
-for epoch in range(30):
+for epoch in range(10):
     for images, labels in data_loader:
+        images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         y_pred = model(images)
         loss = criterion(y_pred, labels)
@@ -44,6 +53,7 @@ correct = 0
 total = 0
 with torch.no_grad():
     for images, labels in data_loader_test:
+        images, labels = images.to(device), labels.to(device)
         y_pred = model(images)
         _, predicted = torch.max(y_pred, 1)
         total += labels.size(0)

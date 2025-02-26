@@ -73,4 +73,3 @@ if __name__ == '__main__':
                 accuracy = empirical_accuracy(epsilon, sample_num=5000, mechanism=mechanism)
                 f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
             f.write('\n')
-

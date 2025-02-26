@@ -48,4 +48,3 @@ def samples_of_mechanism(private_values, sample_num, mechanism, epsilon):
 
     assert len(samples) == sample_num
     return samples
-

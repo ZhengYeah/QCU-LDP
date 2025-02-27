@@ -7,13 +7,13 @@ import torch
 import torch.nn as nn
 
 private_image = np.load('../experiments/mnist/mnist_14_14.npy')
-merged_dims = merge_dim_of_2d_img(private_image, twice_grid_step=2)
+merged_dims, unmerged_dims, grid_step = merge_dim_of_2d_img(private_image, twice_grid_step=2)
 model = torch.load('../experiments/mnist/ffnn_mnist_14_14.pth', map_location=torch.device('cpu'), weights_only=False)
 
 
 def test_robust_radius():
     x = torch.tensor(private_image, dtype=torch.float32)
-    robust_radius = RobustRadiusTorch(model, x, merged_dims, 0.05, 0.1)
+    robust_radius = RobustRadiusTorch(model, x, merged_dims, unmerged_dims, grid_step, 0.05, 0.05)
     radius = robust_radius.binary_search()
     assert radius > 0
     print(f"Robust radius: {radius}")

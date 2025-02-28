@@ -1,5 +1,4 @@
 from src.robust_radius_torch import RobustRadiusTorch
-from src.depracated.merge_dim_of_2d_img import merge_dim_of_2d_img
 from src.samples_from_mechanism import samples_of_mechanism
 from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import numpy as np
@@ -28,43 +27,29 @@ model.eval()
 private_image = np.load('mnist_7_7.npy')
 correct_class = model(torch.tensor(private_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
 
-merged_ind, unmerged_ind, grid_step = merge_dim_of_2d_img(private_image, twice_grid_step=7)
-# transform to tensor
-rows_merged = torch.tensor([merged_ind[i][0] for i in range(len(merged_ind))])
-cols_merged = torch.tensor([merged_ind[i][1] for i in range(len(merged_ind))])
-tensor_merged_ind = torch.stack((rows_merged, cols_merged), dim=0)
-rows_unmerged = torch.tensor([unmerged_ind[i][0] for i in range(len(unmerged_ind))])
-cols_unmerged = torch.tensor([unmerged_ind[i][1] for i in range(len(unmerged_ind))])
-tensor_unmerged_ind = torch.stack((rows_unmerged, cols_unmerged), dim=0)
-
-
 def robust_rect():
     x = torch.tensor(private_image, dtype=torch.float32)
-    robust_rec = RobustRadiusTorch(model, x, merged_ind, unmerged_ind, grid_step, 0.05, 0.1)
+    robust_rec = RobustRadiusTorch(model, x, 0.05, 0.1)
     radius = robust_rec.binary_search()
     print(f"Robust radius: {radius}")
-    founded_rec = robust_rec.adjust_step_rate([(0.04, 0.5), (0.04, 0.2), (0.03, 0.5), (0.03, 0.2)])
-    refined_rec = robust_rec.adjust_step_rate([(0.02, 0.1), (0.01, 0.1)])
-    print(f"Founded robust rectangle: {founded_rec}")
+    # founded_rec = robust_rec.adjust_step_rate([(0.04, 0.5), (0.04, 0.2), (0.03, 0.5), (0.03, 0.2)])
+    refined_rec = robust_rec.adjust_step_rate([(0.02, 0), (0.01, 0.1)])
+    # print(f"Founded robust rectangle: {founded_rec}")
     print(f"Refined robust rectangle: {refined_rec}")
     return refined_rec
 
 def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     # compute the theoretical accuracy
     prob_accumulated = 1
-    # shaper of the robust rectangle: (2, 14, 14)
+    # shaper of the robust rectangle: (2, 7, 7)
     assert robust_rectangle[0].shape == robust_rectangle[1].shape
     for i in range (robust_rectangle[0].shape[0]):
         for j in range (robust_rectangle[0].shape[1]):
-            if (i, j) in merged_ind or (i, j) in unmerged_ind:
-                rectangle = (robust_rectangle[0][i, j], robust_rectangle[1][i, j])
-                cdf_at_x = CDFAtX(epsilon, private_image[i, j])
-                cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
-                # NOTE: calibration is necessary due to the large error accumulation
-                # cdf_rect = 1 if abs(1 - cdf_rect) < 1e-2 else cdf_rect
-                prob_accumulated *= cdf_rect
-            else:
-                continue
+            rectangle = (robust_rectangle[0][i, j], robust_rectangle[1][i, j])
+            cdf_at_x = CDFAtX(epsilon, private_image[i, j])
+            cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
+            cdf_rect = 1 if abs(1 - cdf_rect) < 1e-2 else cdf_rect
+            prob_accumulated *= cdf_rect
     return prob_accumulated
 
 def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
@@ -76,10 +61,6 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
     # process the merged dims
     samples = torch.tensor(samples, dtype=torch.float32)
     samples = samples.view(sample_num, private_image.shape[0], private_image.shape[1])
-    for i in range(1, grid_step):
-        samples[:, rows_merged + i, cols_merged] = samples[:, rows_merged, cols_merged]
-        samples[:, rows_merged, cols_merged + i] = samples[:, rows_merged, cols_merged]
-        samples[:, rows_merged + i, cols_merged + i] = samples[:, rows_merged, cols_merged]
     # unsqueeze the samples for CNN
     samples = samples.unsqueeze(1).float()
     with torch.no_grad():
@@ -97,20 +78,13 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
 
 if __name__ == '__main__':
     robust_rectangle = robust_rect()
-
-    # # write the theoretical and empirical accuracy to csv file
-    # with open('cnn_accuracy.csv', 'w') as f:
-    #     f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical\n')
-    #     for epsilon in range(1, 11):
-    #         f.write(f'{epsilon}')
-    #         for mechanism in ["pm", "sw", "krr", "exp", "laplace"]:
-    #             prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-    #             accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
-    #             f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
-    #         f.write('\n')
-
-    epsilon = 4
-    theoretical_acc = theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm")
-    empirical_acc = empirical_accuracy(epsilon, sample_num=3000, mechanism="pm")
-    print(f"Theoretical accuracy: {theoretical_acc}")
-    print(f"Empirical accuracy: {empirical_acc}")
+    # write the theoretical and empirical accuracy to csv file
+    with open('cnn_accuracy.csv', 'w') as f:
+        f.write('epsilon,pm_theo,pm_empirical,exp_theo,exp_empirical,gaussian_theo,gaussian_empirical\n')
+        for epsilon in range(1, 11):
+            f.write(f'{epsilon}')
+            for mechanism in ["pm", "sw", "krr", "exp"]:
+                prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
+                accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
+                f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
+            f.write('\n')

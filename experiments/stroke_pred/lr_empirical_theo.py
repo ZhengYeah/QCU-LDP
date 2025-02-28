@@ -36,7 +36,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
 
 
 def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
-    if mechanism == "laplace":
+    if mechanism == "laplace" or mechanism == "gaussian":
         samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
     else:
         samples = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
@@ -67,12 +67,12 @@ if __name__ == '__main__':
 
     # write the theoretical and empirical accuracy to csv file
     with open('lr_accuracy.csv', 'w') as f:
-        f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical\n')
+        f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')
         for epsilon in range(1, 9):
             f.write(f'{epsilon}')
-            for mechanism in ["pm", "sw", "krr", "exp", "laplace"]:
+            for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:
                 prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-                accuracy = empirical_accuracy(epsilon, sample_num=6000, mechanism=mechanism)
+                accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
                 f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
             f.write('\n')
 

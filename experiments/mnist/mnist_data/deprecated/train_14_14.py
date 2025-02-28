@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 # Load the MNIST
-mnist_data = torchvision.datasets.MNIST('mnist_data/', download=True, train=True)
+mnist_data = torchvision.datasets.MNIST('../', download=True, train=True)
 # transform each image to 14x14
 transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
@@ -53,10 +53,10 @@ for epoch in range(10):
         optimizer.step()
     print(f'Epoch {epoch}, loss {loss.item()}')
 # Save the model
-torch.save(model, 'cnn_mnist_7_7.pth')
+torch.save(model, '../../cnn_mnist_7_7.pth')
 
 # Test the model
-mnist_data_test = torchvision.datasets.MNIST('mnist_data/', download=True, train=False)
+mnist_data_test = torchvision.datasets.MNIST('../', download=True, train=False)
 mnist_data_test.transform = transform
 data_loader_test = DataLoader(mnist_data_test, batch_size=100, shuffle=True)
 correct = 0

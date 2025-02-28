@@ -1,5 +1,5 @@
 import torch
-from src.robust_radius_torch import RobustRadiusTorch
+from src.deprecated.robust_radius_torch_w_merged_dims import RobustRadiusTorch
 
 # load the model
 model = torch.load('ffnn.pth')

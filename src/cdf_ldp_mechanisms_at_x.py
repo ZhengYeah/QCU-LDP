@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import laplace
+from scipy.stats import laplace, norm
 import math
 
 pi = np.pi
@@ -21,7 +21,7 @@ class CDFAtX:
         :return: (float) CDF of the rectangle region
         """
         cdf_list = self._cdf_of_mechanism(mechanism)
-        if mechanism in ["pm", "sw", "laplace"]:
+        if mechanism in ["pm", "sw", "laplace", "gaussian"]:
             left_index = math.floor(rectangle[0] * self.discretization_level)
             right_index = math.floor(rectangle[1] * self.discretization_level)
             right_index = min(right_index, self.discretization_level - 1)  # avoid out of range
@@ -37,7 +37,7 @@ class CDFAtX:
         :param mechanism: (str) the mechanism name
         :return: (np.ndarray) the CDF list
         """
-        assert mechanism in ["pm", "sw", "krr", "exp", "laplace"]
+        assert mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]
         if mechanism == "pm":
             return self._pm()
         elif mechanism == "sw":
@@ -50,6 +50,8 @@ class CDFAtX:
             return self._exp_square()
         elif mechanism == "laplace":
             return self._laplace()
+        elif mechanism == "gaussian":
+            return self._gaussian()
         else:
             raise ValueError("Invalid mechanism name")
 
@@ -87,6 +89,16 @@ class CDFAtX:
         b = 1 / self.epsilon
         theta = np.linspace(0, 1, self.discretization_level)
         cdf_list = laplace.cdf(theta, mu, b)
+        return cdf_list
+
+    def _gaussian(self, delta=0.05):
+        # CDF of the Gaussian mechanism
+        # assume two dims share delta = 0.1, so each dim has delta = 0.05
+        mu = self.x
+        # sigma = math.sqrt(2 * math.log(1.25 / delta)) / self.epsilon
+        sigma = (math.sqrt(2) / 2) * (math.sqrt(math.log(2 / delta) + self.epsilon) / self.epsilon + math.sqrt(math.log(2 / delta)) / self.epsilon)
+        theta = np.linspace(0, 1, self.discretization_level)
+        cdf_list = norm.cdf(theta, mu, sigma)
         return cdf_list
 
     def _sw(self):

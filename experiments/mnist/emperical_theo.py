@@ -17,9 +17,10 @@ def robust_rect():
     radius = robust_rec.binary_search()
     print(f"Robust radius: {radius}")
     founded_rec = robust_rec.adjust_step_rate([(0.4, 0.5), (0.4, 0.4), (0.3, 0.5), (0.4, 0.3), (0.3, 0.4), (0.2, 0.5), (0.5, 0.2)])
-    refined_rec = robust_rec.adjust_step_rate([(0.1, 0.5), (0.05, 0.5)])
+    refined_rec = robust_rec.adjust_step_rate([(0.1, 0.8), (0.1, 0.5), (0.05, 0.5)])
     print(f"Founded robust rectangle: {founded_rec}")
     print(f"Refined robust rectangle: {refined_rec}")
+    return refined_rec
 
 def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     # compute the theoretical accuracy
@@ -31,7 +32,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
         prob_accumulated *= cdf_rect
     return prob_accumulated
 
-def empirical_accuracy(epsilon, sample_num=4000, mechanism="pm"):
+def empirical_accuracy(epsilon, sample_num=1000, mechanism="pm"):
     if mechanism == "laplace":
         samples, fail_num_laplace = samples_of_mechanism(private_image, sample_num, mechanism, epsilon)
     else:
@@ -53,8 +54,6 @@ def empirical_accuracy(epsilon, sample_num=4000, mechanism="pm"):
 
 if __name__ == '__main__':
     robust_rectangle = robust_rect()
-    epsilon = 0.1
+    epsilon = 1
     theoretical_acc = theoretical_accuracy(epsilon, robust_rectangle)
-    empirical_acc = empirical_accuracy(epsilon)
     print(f"Theoretical accuracy: {theoretical_acc}")
-    print(f"Empirical accuracy: {empirical_acc}")

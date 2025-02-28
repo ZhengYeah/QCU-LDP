@@ -33,7 +33,7 @@ class RobustRadiusTorch:
 
         self.omega = omega
         self.tau = tau
-        self.correct_class = self.model(self.x.unsqueeze(0)).argmax(dim=1)
+        self.correct_class = self.model(self.x.unsqueeze(0).unsqueeze(0).float()).argmax(dim=1).item()
         # robust radius and area
         self.robust_radius = None
         self.clipped_robust_area = None
@@ -101,7 +101,6 @@ class RobustRadiusTorch:
         self.robust_hyper_rectangle = deepcopy(self.clipped_robust_area)
         return upper
 
-
     def _form_hyper_rectangle_for_dims(self, rate):
         """
         Form a robust hyper rectangle for the perturbed dimensions, sever for the method "_form_hyper_rectangle"
@@ -137,8 +136,6 @@ class RobustRadiusTorch:
         # clip the rectangle
         clipped_rect = [torch.clamp(x, 0, 1) for x in rect]
         return clipped_rect
-
-
 
     def _robust_testing_rectangle(self, rect):
         samples_01, sample_num = self._hoeffding_bound_sample(sample_dim=self.x.shape[0] * self.x.shape[1])

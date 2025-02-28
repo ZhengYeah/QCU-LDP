@@ -21,13 +21,23 @@ else:
 mnist_data.transform = transform
 data_loader = DataLoader(mnist_data, batch_size=100, shuffle=True)
 # Define the model
-model = nn.Sequential(
-    nn.Flatten(),
-    nn.Linear(196, 128),
-    nn.ReLU(),
-    nn.Linear(128, 10)
-)
-model.to(device)
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.fc1 = nn.Linear(32 * 7 * 7, 64)
+        self.fc2 = nn.Linear(64, 10)
+
+    def forward(self, x):
+        x = self.pool(torch.relu(self.conv1(x)))
+        x = torch.relu(self.conv2(x))
+        x = torch.flatten(x, 1)
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+model = CNN().to(device)
 # Define the loss function
 criterion = nn.CrossEntropyLoss()
 # Define the optimizer
@@ -43,7 +53,7 @@ for epoch in range(10):
         optimizer.step()
     print(f'Epoch {epoch}, loss {loss.item()}')
 # Save the model
-torch.save(model, 'ffnn_mnist_14_14.pth')
+torch.save(model, 'cnn_mnist_14_14.pth')
 
 # Test the model
 mnist_data_test = torchvision.datasets.MNIST('mnist_data/', download=True, train=False)

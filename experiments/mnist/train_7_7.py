@@ -5,10 +5,10 @@ from torch.utils.data import DataLoader
 
 # Load the MNIST
 mnist_data = torchvision.datasets.MNIST('mnist_data/', download=True, train=True)
-# transform each image to 14x14
+# transform each image to 7x7
 transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
-    torchvision.transforms.Lambda(lambda x: torch.nn.functional.avg_pool2d(x, kernel_size=2, stride=2))
+    torchvision.transforms.Lambda(lambda x: torch.nn.functional.avg_pool2d(x, kernel_size=4, stride=4))
 ])
 
 if torch.cuda.is_available():
@@ -27,7 +27,7 @@ class CNN(nn.Module):
         self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
-        self.fc1 = nn.Linear(32 * 7 * 7, 64)
+        self.fc1 = nn.Linear(32 * 3 * 3, 64)
         self.fc2 = nn.Linear(64, 10)
 
     def forward(self, x):

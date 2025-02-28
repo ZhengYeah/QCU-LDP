@@ -79,13 +79,15 @@ class RobustRadiusTorch:
         samples, sample_num = self._form_samples_for_dims(radius)
         # if the model has a flatten layer, there is no need to flatten the samples
         samples = samples.to(self.x.device)
+        # unsqueeze the samples for CNN
+        samples = samples.unsqueeze(1).float()
         with torch.no_grad():
             predictions = self.model(samples)
         predictions = predictions.argmax(dim=1)
         correct_num = (predictions == self.correct_class).sum().item()
         return 1 - correct_num / sample_num <= self.tau
 
-    def binary_search(self, lower=0, upper=0.5, tol=1e-2):
+    def binary_search(self, lower=0, upper=1, tol=1e-2):
         while upper - lower > tol:
             mid = (lower + upper) / 2
             if self._robust_testing_radius(mid):
@@ -154,6 +156,8 @@ class RobustRadiusTorch:
         assert rect[0].all() <= samples.all() <= rect[1].all()
         # test the samples
         samples = samples.to(self.x.device)
+        # unsqueeze the samples for CNN
+        samples = samples.unsqueeze(1).float()
         with torch.no_grad():
             predictions = self.model(samples)
         predictions = predictions.argmax(dim=1)

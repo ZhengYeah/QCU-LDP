@@ -1,6 +1,6 @@
 import numpy as np
 
-def merge_dim_of_2d_img(img, twice_grid_step=2):
+def merge_dim_of_2d_img(img, twice_grid_step=7):
     """
     Merge the two dimensions of a 2D image to form a 1D image
     :param img: (ndarray) a 2D image

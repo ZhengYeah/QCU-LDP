@@ -1,8 +1,7 @@
 from src.robust_radius_torch import RobustRadiusTorch
-from src.merge_dim_of_2d_img import merge_dim_of_2d_img
+from src.depracated.merge_dim_of_2d_img import merge_dim_of_2d_img
 import numpy as np
 import torch
-import torch.nn as nn
 
 private_image = np.load('../experiments/mnist/mnist_14_14.npy')
 merged_dims, unmerged_dims, grid_step = merge_dim_of_2d_img(private_image, twice_grid_step=2)

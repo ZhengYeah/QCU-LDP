@@ -1,4 +1,4 @@
-from src.merge_dim_of_2d_img import merge_dim_of_2d_img
+from src.depracated.merge_dim_of_2d_img import merge_dim_of_2d_img
 import numpy as np
 
 # load the image

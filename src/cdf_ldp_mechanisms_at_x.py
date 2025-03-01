@@ -6,7 +6,7 @@ pi = np.pi
 exp = np.e
 
 class CDFAtX:
-    def __init__(self, epsilon, x, bin_num=256):
+    def __init__(self, epsilon, x, bin_num=100):
         self.epsilon = epsilon
         self.discretization_level = 500
         assert 0 <= x <= 1
@@ -23,11 +23,11 @@ class CDFAtX:
         cdf_list = self._cdf_of_mechanism(mechanism)
         if mechanism in ["pm", "sw", "laplace", "gaussian"]:
             left_index = math.floor(rectangle[0] * self.discretization_level)
-            right_index = math.floor(rectangle[1] * self.discretization_level)
+            right_index = math.ceil(rectangle[1] * self.discretization_level)
             right_index = min(right_index, self.discretization_level - 1)  # avoid out of range
         else:
             left_index = math.floor(rectangle[0] * self.bin_num)
-            right_index = math.floor(rectangle[1] * self.bin_num)
+            right_index = math.ceil(rectangle[1] * self.bin_num)
             right_index = min(right_index, self.bin_num - 1)
         return cdf_list[right_index] - cdf_list[left_index]
 
@@ -81,6 +81,10 @@ class CDFAtX:
                 cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (length_list[2] - length_list[1]) + p_list[2] * (theta - length_list[2])
             else:
                 cdf_list[i] = 1
+        if abs(self.x - 0) < 1e-2:
+            cdf_list[0] = 0
+        if abs(self.x - 1) < 1e-2:
+            cdf_list[-1] = 1
         return cdf_list
 
     def _laplace(self):
@@ -127,6 +131,10 @@ class CDFAtX:
                 cdf_list[i] = p_list[0] * length_list[1] + p_list[1] * (length_list[2] - length_list[1]) + p_list[2] * (theta - length_list[2])
             else:
                 cdf_list[i] = 1
+        if abs(self.x - 0) < 1e-2:
+            cdf_list[0] = 0
+        if abs(self.x - 1) < 1e-2:
+            cdf_list[-1] = 1
         return cdf_list
 
     def _exp_abs(self):
@@ -144,6 +152,12 @@ class CDFAtX:
         cdf_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             cdf_list[i] = sum(p_list[:i + 1])
+        if abs(self.x - 0) < 1e-2:
+            cdf_list[0] = 0
+        if abs(self.x - 1) < 1e-2:
+            cdf_list[-1] = 1
+        # print(f"EXP endpoint CDF: {cdf_list[0]}, {cdf_list[-1]}")
+        # assert abs(cdf_list[-1] - 1) < 1e-2 and abs(cdf_list[0]) < 1e-1
         return cdf_list
 
     def _exp_square(self):
@@ -167,11 +181,16 @@ class CDFAtX:
         # pdf list
         p = exp ** self.epsilon / ((self.bin_num - 1) + (exp ** self.epsilon))
         pdf_list = np.zeros(self.bin_num)
+        private_index = math.floor(self.x * self.bin_num)
         for i in range(self.bin_num):
-            index = self.x * self.bin_num
-            pdf_list[i] = p if i == index else p / exp ** self.epsilon
+            pdf_list[i] = p if i == private_index else p / (exp ** self.epsilon)
         # cdf list
         cdf_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             cdf_list[i] = sum(pdf_list[:i + 1])
+        if abs(self.x - 0) < 1e-2:
+            cdf_list[0] = 0
+        if abs(self.x - 1) < 1e-2:
+            cdf_list[-1] = 1
+        # assert abs(cdf_list[-1] - 1) < 1e-2 and abs(cdf_list[0]) < 1e-2
         return cdf_list

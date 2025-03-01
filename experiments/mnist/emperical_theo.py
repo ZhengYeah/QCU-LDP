@@ -35,7 +35,7 @@ def robust_rect():
     # founded_rec = robust_rec.adjust_step_rate([(0.04, 0.5), (0.04, 0.2), (0.03, 0.5), (0.03, 0.2)])
     refined_rec = robust_rec.adjust_step_rate([(0.02, 0), (0.01, 0.1)])
     # print(f"Founded robust rectangle: {founded_rec}")
-    print(f"Refined robust rectangle: {refined_rec}")
+    print(f"Refined robust rectangle:\n{refined_rec[0]}\n{refined_rec[1]}")
     return refined_rec
 
 def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
@@ -46,7 +46,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     for i in range (robust_rectangle[0].shape[0]):
         for j in range (robust_rectangle[0].shape[1]):
             rectangle = (robust_rectangle[0][i, j], robust_rectangle[1][i, j])
-            cdf_at_x = CDFAtX(epsilon, private_image[i, j])
+            cdf_at_x = CDFAtX(epsilon, private_image[i, j], bin_num=100)
             cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
             cdf_rect = 1 if abs(1 - cdf_rect) < 1e-2 else cdf_rect
             prob_accumulated *= cdf_rect
@@ -54,7 +54,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
 
 def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
     flatten_private_image = private_image.flatten()
-    if mechanism == "laplace":
+    if mechanism == "laplace" or mechanism == "gaussian":
         samples, fail_num_laplace = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
     else:
         samples = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
@@ -79,12 +79,16 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
 if __name__ == '__main__':
     robust_rectangle = robust_rect()
     # write the theoretical and empirical accuracy to csv file
-    with open('cnn_accuracy.csv', 'w') as f:
-        f.write('epsilon,pm_theo,pm_empirical,exp_theo,exp_empirical,gaussian_theo,gaussian_empirical\n')
-        for epsilon in range(1, 11):
-            f.write(f'{epsilon}')
-            for mechanism in ["pm", "sw", "krr", "exp"]:
-                prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-                accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
-                f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
-            f.write('\n')
+    # with open('cnn_accuracy.csv', 'w') as f:
+    #     f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,exp_theo,exp_empirical,krr_theo,krr_empirical\n')
+    #     for epsilon in range(7, 11):
+    #         f.write(f'{epsilon}')
+    #         for mechanism in ["pm", "sw", "exp", "krr"]:
+    #             prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
+    #             accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
+    #             f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
+    #         f.write('\n')
+    epsilon = 7
+    mechanism = "sw"
+    prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
+    print(f"Accuracy: {prob_accumulated}")

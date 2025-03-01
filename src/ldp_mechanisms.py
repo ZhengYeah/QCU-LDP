@@ -75,14 +75,15 @@ class DiscreteMechanism:
         """
         the k-RR mechanism
         """
-        assert 0 <= self.private_val < self.total_num
-        p = 1 / ((self.total_num - 1) + (exp ** self.epsilon))
+        assert 0 <= self.private_val <= 1
+        private_index = math.floor(self.private_val * self.total_num)
+        p = (1 / ((self.total_num - 1) + (exp ** self.epsilon))) * (self.total_num - 1)
         tmp = random.uniform(0, 1)
         if tmp < p:
             while True:
                 sampled = random.randint(0, self.total_num)
-                if sampled != self.private_val:
-                    return sampled
+                if sampled != private_index:
+                    return float(sampled / self.total_num)
         else:
             return self.private_val
 

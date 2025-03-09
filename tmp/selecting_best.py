@@ -10,7 +10,7 @@ plt.rcParams['font.serif'] = ['Times New Roman']
 plt.rcParams['font.size'] = 20
 
 
-epsilon = 4
+epsilon = 6
 x = 0.5
 
 cdf_at_x = CDFAtX(epsilon, x)
@@ -45,17 +45,19 @@ for i in range(len(theta)):
 # plot cdf concentration around x
 plt.figure(figsize=(8, 4.8))
 ax = plt.gca()
-plt.plot(theta, pm_concentration_probability, 'black', label='PM', linewidth=2, linestyle='-.')
-plt.plot(theta, sw_concentration_probability, 'red', label='SW', linewidth=2, linestyle='-.')
-plt.plot(theta, exp_concentration_probability, 'green', label=r'Exponential', linewidth=2)
-plt.plot(theta, exp_krr_concentration_probability, 'purple', label='k-RR', linewidth=2)
-plt.plot(theta, laplace_concentration_probability, 'blue', label='Laplace', linewidth=2, linestyle='--')
+for spine in ax.spines.values():
+    spine.set_linewidth(1.5)
+plt.plot(theta, pm_concentration_probability, 'black', label='PM', linewidth=3, linestyle='-.')
+plt.plot(theta, sw_concentration_probability, 'red', label='SW', linewidth=3, linestyle='-.')
+plt.plot(theta, exp_concentration_probability, 'green', label=r'Exponential', linewidth=3)
+plt.plot(theta, exp_krr_concentration_probability, 'purple', label='k-RR', linewidth=3)
+plt.plot(theta, laplace_concentration_probability, 'blue', label='Laplace', linewidth=3, linestyle='--')
 # Remove ending zeros in the ticks
 ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
 plt.xlabel(r'$\theta$')
 plt.ylabel(r'$\rho(\varepsilon, \theta)$')
 plt.legend()
-plt.savefig('./utility_bound_epsilon_4.pdf')
+plt.savefig('./utility_bound_epsilon_6.pdf')
 plt.show()
 

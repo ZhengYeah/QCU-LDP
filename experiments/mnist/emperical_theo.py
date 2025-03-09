@@ -24,7 +24,7 @@ class CNN(nn.Module):
 
 model = torch.load('cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
 model.eval()
-private_image = np.load('mnist_7_7.npy')
+private_image = np.load('mnist_7_7_1.npy')
 correct_class = model(torch.tensor(private_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
 
 def robust_rect():
@@ -79,16 +79,15 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
 if __name__ == '__main__':
     robust_rectangle = robust_rect()
     # write the theoretical and empirical accuracy to csv file
-    # with open('cnn_accuracy.csv', 'w') as f:
-    #     f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,exp_theo,exp_empirical,krr_theo,krr_empirical\n')
-    #     for epsilon in range(7, 11):
-    #         f.write(f'{epsilon}')
-    #         for mechanism in ["pm", "sw", "exp", "krr"]:
-    #             prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-    #             accuracy = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
-    #             f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
-    #         f.write('\n')
-    epsilon = 7
-    mechanism = "sw"
-    prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-    print(f"Accuracy: {prob_accumulated}")
+    with open('cnn_accuracy_1.csv', 'w') as f:
+        f.write('epsilon,pm_theo,pm_empirical,pm_std,sw_theo,sw_empirical,sw_std,exp_theo,exp_empirical,exp_std,krr_theo,krr_empirical,krr_std\n')
+        for epsilon in range(1, 11):
+            f.write(f'{epsilon}')
+            for mechanism in ["pm", "sw", "exp", "krr"]:
+                prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
+                # repeat 3 times to get the std
+                empirical_accuracies = [empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism) for _ in range(3)]
+                accuracy = np.mean(empirical_accuracies)
+                std = np.std(empirical_accuracies)
+                f.write(f',{prob_accumulated:.6f},{accuracy:.3f},{std:.3f}')
+            f.write('\n')

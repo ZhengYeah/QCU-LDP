@@ -10,7 +10,7 @@ plt.rcParams['font.serif'] = ['Times New Roman']
 plt.rcParams['font.size'] = 12
 
 mnist_data = datasets.MNIST('mnist_data/', download=False, train=True)
-image = mnist_data[1][0] # get the second image
+image = mnist_data[0][0] # get the second image
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -20,7 +20,7 @@ transform = transforms.Compose([
 image = transform(image)
 image = image.squeeze().numpy()
 # save the image as numpy array
-np.save('mnist_7_7.npy', image)
+np.save('mnist_7_7_0.npy', image)
 
 ax = plt.gca()
 ax.set_xticks([i - 0.5 for i in range(0, 7)])

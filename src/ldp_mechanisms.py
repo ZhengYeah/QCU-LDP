@@ -160,15 +160,16 @@ class NoiseAddingMechanism:
         else:
             return sampled
 
-    def gaussian_with_fail(self, delta=0.05) -> ("float", "int"):
+    def gaussian_with_fail(self, delta=0.052) -> ("float", "int"):
         """
         the Gaussian mechanism with failure
         fail_num: the number of failures, used to compare with the theoretical failure rate
         """
         assert 0 <= self.private_val <= 1 + 1e-6
         fail_num = 0
-        sigma = (math.sqrt(2) / 2) * (math.sqrt(math.log(2 / delta) + self.epsilon) / self.epsilon + math.sqrt(math.log(2 / delta)) / self.epsilon)
-        sampled = self.private_val + np.random.normal(0, sigma ** 2)
+        # sigma = math.sqrt(2 * math.log(1.25 / delta)) / self.epsilon
+        sigma = (math.sqrt(2) / 2) * (math.sqrt(math.log(2 / delta) + self.epsilon) + math.sqrt(math.log(2 / delta))) / self.epsilon
+        sampled = self.private_val + np.random.normal(0, sigma)
         while sampled < 0 or sampled > 1:
             fail_num += 1
             sampled = self.private_val + np.random.normal(0, sigma)

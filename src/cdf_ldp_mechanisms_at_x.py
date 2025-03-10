@@ -95,12 +95,12 @@ class CDFAtX:
         cdf_list = laplace.cdf(theta, mu, b)
         return cdf_list
 
-    def _gaussian(self, delta=0.05):
+    def _gaussian(self, delta=0.052):
         # CDF of the Gaussian mechanism
-        # assume two dims share delta = 0.1, so each dim has delta = 0.05
+        # assume two dims share delta = 0.1, so each dim has delta = 0.052 under the combination theorem
         mu = self.x
         # sigma = math.sqrt(2 * math.log(1.25 / delta)) / self.epsilon
-        sigma = (math.sqrt(2) / 2) * (math.sqrt(math.log(2 / delta) + self.epsilon) / self.epsilon + math.sqrt(math.log(2 / delta)) / self.epsilon)
+        sigma = (math.sqrt(2) / 2) * (math.sqrt(math.log(2 / delta) + self.epsilon) + math.sqrt(math.log(2 / delta))) / self.epsilon
         theta = np.linspace(0, 1, self.discretization_level)
         cdf_list = norm.cdf(theta, mu, sigma)
         return cdf_list

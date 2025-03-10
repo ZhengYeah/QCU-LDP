@@ -55,7 +55,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
 def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
     flatten_private_image = private_image.flatten()
     if mechanism == "laplace" or mechanism == "gaussian":
-        samples, fail_num_laplace = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
+        samples, fail_num = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
     else:
         samples = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
     # process the merged dims
@@ -70,7 +70,7 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
     # calculate the empirical accuracy
     correct_num = (pred == correct_class).sum().item()
     if mechanism == "laplace":
-        accuracy = correct_num / (sample_num + fail_num_laplace)
+        accuracy = correct_num / (sample_num + fail_num)
     else:
         accuracy = correct_num / sample_num
     return accuracy

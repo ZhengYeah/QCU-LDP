@@ -142,7 +142,7 @@ class CDFAtX:
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             score_array[i] = - abs(self.x - i / self.bin_num)
-        sensitivity = 0.5
+        sensitivity = 1
         # probability array
         p_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):
@@ -156,8 +156,8 @@ class CDFAtX:
             cdf_list[0] = 0
         if abs(self.x - 1) < 1e-2:
             cdf_list[-1] = 1
-        # print(f"EXP endpoint CDF: {cdf_list[0]}, {cdf_list[-1]}")
-        # assert abs(cdf_list[-1] - 1) < 1e-2 and abs(cdf_list[0]) < 1e-1
+        # print(f"EXP endpoint CDF: {rho_list[0]}, {rho_list[-1]}")
+        # assert abs(rho_list[-1] - 1) < 1e-2 and abs(rho_list[0]) < 1e-1
         return cdf_list
 
     def _exp_square(self):
@@ -165,7 +165,7 @@ class CDFAtX:
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             score_array[i] = - abs(self.x - i / self.bin_num) ** 2
-        sensitivity = 0.5
+        sensitivity = 1
         # probability array
         p_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):
@@ -192,5 +192,5 @@ class CDFAtX:
             cdf_list[0] = 0
         if abs(self.x - 1) < 1e-2:
             cdf_list[-1] = 1
-        # assert abs(cdf_list[-1] - 1) < 1e-2 and abs(cdf_list[0]) < 1e-2
+        # assert abs(rho_list[-1] - 1) < 1e-2 and abs(rho_list[0]) < 1e-2
         return cdf_list

@@ -58,6 +58,6 @@ ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
 plt.xlabel(r'$\theta$')
 plt.ylabel(r'$\rho(\varepsilon, \theta)$')
 plt.legend()
-plt.savefig('./utility_bound_epsilon_6.pdf')
+plt.savefig('./selecting_best_epsilon_6.pdf')
 plt.show()
 

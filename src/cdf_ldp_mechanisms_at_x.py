@@ -142,7 +142,7 @@ class CDFAtX:
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             score_array[i] = - abs(self.x - i / self.bin_num)
-        sensitivity = 1
+        sensitivity = 0.5
         # probability array
         p_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):
@@ -165,7 +165,7 @@ class CDFAtX:
         score_array = np.zeros(self.bin_num)
         for i in range(self.bin_num):
             score_array[i] = - abs(self.x - i / self.bin_num) ** 2
-        sensitivity = 1
+        sensitivity = 0.5
         # probability array
         p_list = np.zeros(self.bin_num)
         for i in range(self.bin_num):

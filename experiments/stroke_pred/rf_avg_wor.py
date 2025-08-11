@@ -10,7 +10,7 @@ import joblib
 user_row = [0.79,1.0,0.0,1.0,0.5804,0.48]
 private_ind_1, private_ind_2 = 0, 5
 data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
-model = joblib.load('classifiers/stroke_lr.pkl')
+model = joblib.load('classifiers/stroke_rf.pkl')
 
 def robust_rect_rf(x_dataframe):
     robust_rec = RobustRadiusSKLearn(model, x_dataframe, ['age','bmi'], 0.05, 0.03)
@@ -69,7 +69,7 @@ if __name__ == '__main__':
             user_row_list.append(tmp_row)
     assert user_row_list[0] == [0.0, 1.0, 0.0, 1.0, 0.5804, 0.0]
 
-    with open('lr_avg_wor.csv', 'w') as f:
+    with open('rf_avg_wor.csv', 'w') as f:
         f.write('x_pv_1,x_pv_2,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')
         for epsilon in range(1, 9):
             for user_row in user_row_list:
@@ -81,6 +81,6 @@ if __name__ == '__main__':
                 f.write(f',{epsilon}')
                 for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:
                     prob_accumulated = theoretical_accuracy(x_private_values, epsilon, robust_rectangle, mechanism=mechanism)
-                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=3000, mechanism=mechanism)
+                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=500, mechanism=mechanism)
                     f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
                 f.write('\n')

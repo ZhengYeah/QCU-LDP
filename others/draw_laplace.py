@@ -11,7 +11,7 @@ x = np.linspace(-0.5, 1.5, 1000)
 pdf = laplace.pdf(x, mu, b)
 
 # Plot the PDF of the Laplace distribution
-plt.plot(x, pdf, 'black')
+plt.plot(x, pdf, 'blue', linewidth=3)
 
 # Add labels and title
 plt.xlabel('x')

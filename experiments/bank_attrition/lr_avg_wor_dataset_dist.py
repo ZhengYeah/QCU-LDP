@@ -6,13 +6,10 @@ import pandas as pd
 import joblib
 
 # private features: age (index 1), salary (index 6)
-# choose a user from the dataset as x
-user_row = [0.619,0.22,0.2,0.0,0.25,1.0,0.5067444,0.4,0.464]
 private_ind_1, private_ind_2 = 1, 6
-private_values = [user_row[1], user_row[6]] # age, salary
 data_columns=['CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'IsActiveMember',
                              'EstimatedSalary', 'Satisfaction Score', 'Point Earned']
-model = joblib.load('classifiers/bank_rf.pkl')
+model = joblib.load('classifiers/bank_lr.pkl')
 
 def robust_rect_rf(x_dataframe):
     robust_rec = RobustRadiusSKLearn(model, x_dataframe, ['Age','EstimatedSalary'], 0.05, 0.03)
@@ -32,7 +29,8 @@ def theoretical_accuracy(private_values, epsilon, robust_rectangle, mechanism="p
     return prob_accumulated
 
 
-def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm"):
+def empirical_accuracy(user_row, epsilon, sample_num=3000, mechanism="pm"):
+    private_values = [user_row[private_ind_1], user_row[private_ind_2]]
     if mechanism == "laplace" or mechanism == "gaussian":
         samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
     else:
@@ -60,29 +58,24 @@ def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm")
 
 
 if __name__ == '__main__':
-    # form list for the Age and EstimatedSalary, combine them with the user_row
-    age_range, salary_range = np.arange(0, 1, 0.05), np.arange(0, 1, 0.05)
-    user_other_row = [0.619,0.2,0.0,0.25,1.0,0.4,0.464]  # CreditScore, Tenure, Balance, NumOfProducts, IsActiveMember, Satisfaction Score
-    # insert age and salary into the user_other_row
-    user_row_list = []
-    for age in age_range:
-        for salary in salary_range:
-            tmp_row = user_other_row[:1] + [age] + user_other_row[1:5] + [salary] + user_other_row[5:]
-            user_row_list.append(tmp_row)
-    assert user_row_list[0] == [0.619,0,0.2,0.0,0.25,1.0,0,0.4,0.464]
-
-    with open('rf_avg_wor.csv', 'w') as f:
+    # load the processed stroke data, without index
+    df = pd.read_csv('classifiers/processed_bank_data_normalized.csv')
+    df = df.iloc[:100].drop(columns=['Exited'])
+    with open('lr_avg_wor.csv', 'w') as f:
         f.write('x_pv_1,x_pv_2,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')
-        for user_row in user_row_list:
+        # iterate each row in the dataframe
+        for user_row in df.values:
+            # form a dataframe for the user_row
             x_df = pd.DataFrame(data=[user_row], columns=data_columns)
             robust_rectangle = robust_rect_rf(x_df)
-            x_private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
+            x_private_values = [user_row[private_ind_1], user_row[private_ind_2]]
             # write the theoretical and empirical accuracy to csv file
             for epsilon in range(1, 9):
                 f.write(f'{x_private_values[0]:.2f},{x_private_values[1]:.2f}')
                 f.write(f',{epsilon}')
                 for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:
                     prob_accumulated = theoretical_accuracy(x_private_values, epsilon, robust_rectangle, mechanism=mechanism)
-                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=3000, mechanism=mechanism)
+                    accuracy = empirical_accuracy(user_row, epsilon, sample_num=3000, mechanism=mechanism)
                     f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
                 f.write('\n')
+

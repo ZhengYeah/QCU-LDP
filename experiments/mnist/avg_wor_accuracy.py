@@ -24,10 +24,8 @@ class CNN(nn.Module):
 
 model = torch.load('cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
 model.eval()
-private_image = np.load('mnist_7_7_1.npy')
-correct_class = model(torch.tensor(private_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
 
-def robust_rect():
+def robust_rect(private_image):
     x = torch.tensor(private_image, dtype=torch.float32)
     robust_rec = RobustRadiusTorch(model, x, 0.05, 0.1)
     radius = robust_rec.binary_search()
@@ -38,7 +36,7 @@ def robust_rect():
     print(f"Refined robust rectangle:\n{refined_rec[0]}\n{refined_rec[1]}")
     return refined_rec
 
-def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
+def theoretical_accuracy(private_image, epsilon, robust_rectangle, mechanism="pm"):
     # compute the theoretical accuracy
     prob_accumulated = 1
     # shaper of the robust rectangle: (2, 7, 7)
@@ -52,7 +50,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
             prob_accumulated *= cdf_rect
     return prob_accumulated
 
-def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
+def empirical_accuracy(private_image, epsilon, sample_num=3000, mechanism="pm"):
     flatten_private_image = private_image.flatten()
     if mechanism == "laplace" or mechanism == "gaussian":
         samples, fail_num = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
@@ -77,15 +75,20 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
 
 
 if __name__ == '__main__':
-    robust_rectangle = robust_rect()
-    # write the theoretical and empirical accuracy to csv file
-    with open('cnn_accuracy_1.csv', 'w') as f:
-        f.write('epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,exp_theo,exp_empirical,krr_theo,krr_empirical\n')
-        for epsilon in range(1, 11):
-            f.write(f'{epsilon}')
-            for mechanism in ["pm", "sw", "exp", "krr"]:
-                prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
-                # repeat 3 times to get the std
-                empirical_accuracies = empirical_accuracy(epsilon, sample_num=3000, mechanism=mechanism)
-                f.write(f',{prob_accumulated:.6f},{empirical_accuracies:.3f}')
-            f.write('\n')
+    # the first 10 images are used for the experiments
+    for index_img in range(10):
+        # change this to select a different image
+        pri_image = np.load(f'mnist_7_7_{index_img}.npy')
+        correct_class = model(torch.tensor(pri_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
+
+        robust_rectangle = robust_rect(pri_image)
+        # write the theoretical and empirical accuracy to csv file
+        with open('cnn_avg_wor_accuracy.csv', 'a') as f:
+            f.write('index_img,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,exp_theo,exp_empirical,krr_theo,krr_empirical\n')
+            for epsilon in range(1, 11):
+                f.write(f'{index_img},{epsilon}')
+                for mechanism in ["pm", "sw", "exp", "krr"]:
+                    prob_accumulated = theoretical_accuracy(pri_image, epsilon, robust_rectangle, mechanism=mechanism)
+                    empirical_accuracies = empirical_accuracy(pri_image, epsilon, sample_num=3000, mechanism=mechanism)
+                    f.write(f',{prob_accumulated:.6f},{empirical_accuracies:.3f}')
+                f.write('\n')

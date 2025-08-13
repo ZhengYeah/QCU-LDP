@@ -50,7 +50,7 @@ def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm")
     ground_truth = model.predict(x_df)
     pred = model.predict(perturbed_df)
     # calculate the empirical accuracy
-    if mechanism == "laplace":
+    if mechanism == "laplace" or mechanism == "gaussian":
         accuracy = np.sum(ground_truth == pred) / (sample_num + fail_num_laplace)
     else:
         accuracy = np.sum(ground_truth == pred) / sample_num
@@ -59,7 +59,7 @@ def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm")
 
 if __name__ == '__main__':
     # form list for the age and bmi, combine them with the user_row
-    age_range, bmi_range = np.arange(0, 1, 0.05), np.arange(0, 1, 0.05)
+    age_range, bmi_range = np.arange(0, 1, 0.1), np.arange(0, 1, 0.1)
     user_other_row = [1.0, 0.0, 1.0, 0.5804]  # hypertension, heart_disease, ever_married, avg_glucose_level
     # insert age and bmi into the user_other_row
     user_row_list = []
@@ -81,6 +81,6 @@ if __name__ == '__main__':
                 f.write(f',{epsilon}')
                 for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:
                     prob_accumulated = theoretical_accuracy(x_private_values, epsilon, robust_rectangle, mechanism=mechanism)
-                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=500, mechanism=mechanism)
+                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=6000, mechanism=mechanism)
                     f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
                 f.write('\n')

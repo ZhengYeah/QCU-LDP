@@ -52,7 +52,7 @@ def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm")
     ground_truth = model.predict(x_df)
     pred = model.predict(perturbed_df)
     # calculate the empirical accuracy
-    if mechanism == "laplace":
+    if mechanism == "laplace" or mechanism == "gaussian":
         accuracy = np.sum(ground_truth == pred) / (sample_num + fail_num_laplace)
     else:
         accuracy = np.sum(ground_truth == pred) / sample_num
@@ -73,12 +73,12 @@ if __name__ == '__main__':
 
     with open('lr_avg_wor.csv', 'w') as f:
         f.write('x_pv_1,x_pv_2,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')
-        for epsilon in range(1, 9):
-            for user_row in user_row_list:
-                x_df = pd.DataFrame(data=[user_row], columns=data_columns)
-                robust_rectangle = robust_rect_rf(x_df)
-                x_private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
-                # write the theoretical and empirical accuracy to csv file
+        for user_row in user_row_list:
+            x_df = pd.DataFrame(data=[user_row], columns=data_columns)
+            robust_rectangle = robust_rect_rf(x_df)
+            x_private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
+            # write the theoretical and empirical accuracy to csv file
+            for epsilon in range(1, 9):
                 f.write(f'{x_private_values[0]:.2f},{x_private_values[1]:.2f}')
                 f.write(f',{epsilon}')
                 for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:

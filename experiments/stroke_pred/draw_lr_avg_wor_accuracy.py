@@ -38,3 +38,36 @@ plt.ylabel(r'$\rho(\varepsilon)$')
 plt.legend(fontsize=18)
 plt.savefig('./lr_avg_accuracy.pdf')
 plt.show()
+
+
+# worst-case accuracy plot
+df = pd.read_csv('lr_avg_wor.csv')
+df["epsilon"] = df["epsilon"].astype(int)
+# compute the worst-case of the theoretical and empirical accuracy for each epsilon
+df["pm_theo"] = df.groupby("epsilon")["pm_theo"].transform('min')
+df["pm_empirical"] = df.groupby("epsilon")["pm_empirical"].transform('min')
+df["exp_theo"] = df.groupby("epsilon")["exp_theo"].transform('min')
+df["exp_empirical"] = df.groupby("epsilon")["exp_empirical"].transform('min')
+df["laplace_theo"] = df.groupby("epsilon")["laplace_theo"].transform('min')
+df["laplace_empirical"] = df.groupby("epsilon")["laplace_empirical"].transform('min')
+df = df.drop_duplicates(subset=["epsilon"])
+
+for spine in plt.gca().spines.values():
+    spine.set_linewidth(1)
+plt.ylim(0, 1)
+plt.xticks(range(1, 9))
+# shaded region between the theoretical and empirical accuracy
+plt.plot(df["epsilon"], df["pm_theo"], label="PM", marker='o', color='red', linewidth=2.5)
+plt.plot(df["epsilon"], df["pm_empirical"], marker='o', linestyle='--', color='red')
+plt.fill_between(df["epsilon"], df["pm_theo"], df["pm_empirical"], color='red', alpha=0.08)
+plt.plot(df["epsilon"], df["exp_theo"], label="Exp", marker='x', color='green', linewidth=2.5)
+plt.plot(df["epsilon"], df["exp_empirical"], marker='x', linestyle='--', color='green')
+plt.fill_between(df["epsilon"], df["exp_theo"], df["exp_empirical"], color='green', alpha=0.08)
+plt.plot(df["epsilon"], df["laplace_theo"], label="Laplace", marker='s', color='blue', linewidth=2.5)
+plt.plot(df["epsilon"], df["laplace_empirical"], marker='s', linestyle='--', color='blue')
+plt.fill_between(df["epsilon"], df["laplace_theo"], df["laplace_empirical"], color='blue', alpha=0.08)
+plt.xlabel(r'Privacy parameter $\varepsilon$')
+plt.ylabel(r'$\rho(\varepsilon)$')
+plt.legend(fontsize=18)
+plt.savefig('./lr_wor_accuracy.pdf')
+plt.show()

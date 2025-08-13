@@ -55,7 +55,7 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
     ground_truth = model.predict(x_df)
     pred = model.predict(perturbed_df)
     # calculate the empirical accuracy
-    if mechanism == "laplace":
+    if mechanism == "laplace" or mechanism == "gaussian":
         accuracy = np.sum(ground_truth == pred) / (sample_num + fail_num_laplace)
     else:
         accuracy = np.sum(ground_truth == pred) / sample_num

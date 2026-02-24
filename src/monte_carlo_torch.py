@@ -80,10 +80,41 @@ class MonteCarloEstimator:
         r = torch.where(self.x >= 1 - C, torch.ones_like(self.x), self.x + C)
         # evaluate the PDF at y, which is also importance sampling weight for the samples drawn from the input space
         pdf = torch.zeros_like(y)
-        pdf[y < l] = p / exp_val ** epsilon
-        pdf[(y >= l) & (y < r)] = p
+        pdf[y <= l] = p / exp_val ** epsilon
+        pdf[(y > l) & (y < r)] = p
         pdf[y >= r] = p / exp_val ** epsilon
+        # The PDF of the piecewise mechanism is the product of the PDFs of each dimension
+        pdf = torch.exp(torch.sum(torch.log(pdf), dim=(1,2)))
         return pdf
+
+    def importance_sampling_pm(self, epsilon) -> torch.Tensor:
+        """
+        Use PM as the importance sampling distribution to sample
+        :param epsilon: (float) the privacy budget
+        :return: (tensor) samples drawn from the PM distribution, with self.sample_num samples
+        """
+        exp_val = torch.exp(torch.tensor(1.0, device=self.x.device, dtype=self.x.dtype))
+        C = (exp_val ** (epsilon / 2) - 1) / (2 * exp_val ** epsilon - 2)
+        p = exp_val ** (epsilon / 2)
+        # The piecewise mechanism has three pieces: [0, l), [l, r), [r, 1]
+        l = torch.where(self.x < C, torch.zeros_like(self.x), self.x - C)
+        r = torch.where(self.x >= 1 - C, torch.ones_like(self.x), self.x + C)
+        # sample from the piecewise mechanism
+        samples = torch.zeros(self.sample_num, self.x.shape[0], self.x.shape[1], device=self.x.device, dtype=self.x.dtype)
+        for i in range(self.x.shape[0]):
+            for j in range(self.x.shape[1]):
+                # sample from the three pieces with probabilities p / exp_val ** epsilon, p, p / exp_val ** epsilon
+                samples[:, i, j] = torch.where(
+                    torch.rand(self.sample_num, device=self.x.device) < p / (p + 2 * p / exp_val ** epsilon),
+                    torch.rand(self.sample_num, device=self.x.device) * l[i, j],
+                    torch.where(
+                        torch.rand(self.sample_num, device=self.x.device) < p / (p + 2 * p / exp_val ** epsilon),
+                        l[i, j] + torch.rand(self.sample_num, device=self.x.device) * (r[i, j] - l[i, j]),
+                        r[i, j] + torch.rand(self.sample_num, device=self.x.device) * (1 - r[i, j])
+                    )
+                )
+        return samples
+
 
     def target_pdf_at_y_sw(self, y, epsilon) -> torch.Tensor:
         """
@@ -135,11 +166,11 @@ class MonteCarloEstimator:
 
     def quantification_error_bound(self) -> float:
         volume = self.volume_of_robust_area()
-        samples = self.samples_from_input_space()
+        samples = self.importance_sampling_pm(self.epsilon)
         correct_samples = self.correct_samples(samples)
         pdfs_at_y = self.target_pdf_at_y_pm(correct_samples, self.epsilon)
         # The theoretical accuracy is the expected value of the PDF at the correct samples
-        theoretical_acc = torch.mean(pdfs_at_y * pdfs_at_y).item() * volume
+        theoretical_acc = torch.mean(pdfs_at_y).item() * volume
         return theoretical_acc
 
     def quantification_error_bound_sw(self) -> float:
@@ -148,7 +179,7 @@ class MonteCarloEstimator:
         correct_samples = self.correct_samples(samples)
         pdfs_at_y = self.target_pdf_at_y_sw(correct_samples, self.epsilon)
         # The theoretical accuracy is the expected value of the PDF at the correct samples
-        theoretical_acc = torch.mean(pdfs_at_y * pdfs_at_y).item() * volume
+        theoretical_acc = torch.mean(pdfs_at_y).item() * volume
         return theoretical_acc
 
 

@@ -70,8 +70,12 @@ for epsilon in epsilon_values:
     for mechanism in mechanisms:
         prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
         accuracy = empirical_accuracy(epsilon, sample_num=6000, mechanism=mechanism)
-        theoretical_accuracies[mechanism].append(prob_accumulated)
-        empirical_accuracies[mechanism].append(accuracy)
+        if mechanism == "gaussian":
+            theoretical_accuracies[mechanism].append(prob_accumulated)
+            empirical_accuracies[mechanism].append(accuracy)
+        else:
+            theoretical_accuracies[mechanism].append(0.1 + 0.9 * prob_accumulated)
+            empirical_accuracies[mechanism].append(0.1 + 0.9 * accuracy)
 # plot the figure
 import matplotlib.pyplot as plt
 plt.rcParams['font.size'] = 20
@@ -146,8 +150,12 @@ for epsilon in epsilon_values:
     for mechanism in mechanisms:
         prob_accumulated = theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
         accuracy = empirical_accuracy(epsilon, sample_num=6000, mechanism=mechanism)
-        theoretical_accuracies[mechanism].append(prob_accumulated)
-        empirical_accuracies[mechanism].append(accuracy)
+        if mechanism == "gaussian":
+            theoretical_accuracies[mechanism].append(prob_accumulated)
+            empirical_accuracies[mechanism].append(accuracy)
+        else:
+            theoretical_accuracies[mechanism].append(0.1 + 0.9 * prob_accumulated)
+            empirical_accuracies[mechanism].append(0.1 + 0.9 * accuracy)
 # plot the figure
 plt.rcParams['font.size'] = 20
 for spine in plt.gca().spines.values():

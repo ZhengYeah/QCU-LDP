@@ -14,19 +14,24 @@ private_ind_1, private_ind_2 = 0, 5
 private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
 data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
 x_df = pd.DataFrame(data=[user_row], columns=data_columns)
-model = joblib.load('classifiers/stroke_lr.pkl')
+model = joblib.load('../experiments/stroke_pred/classifiers/stroke_lr.pkl')
 
 # time variables
 empirical_sampling_time = 0
 empirical_inference_time = 0
 theoretical_time = 0
+robust_radius_time = 0
 
 def robust_rect_rf():
     robust_rec = RobustRadiusSKLearn(model, x_df, ['age','bmi'], 0.05, 0.03)
+    start_time = time.perf_counter()
     radius = robust_rec.binary_search()
+    end_time = time.perf_counter()
+    robust_radius_time = end_time - start_time
+
     robust_rectangle = robust_rec.adjust_step_rate([(0.4, 0.5), (0.3, 0.5), (0.2, 0.5)])
     robust_rectangle = robust_rec.adjust_step_rate([(0.1, 0.5), (0.05, 0.5)])
-    return robust_rectangle
+    return robust_rectangle, robust_radius_time
 
 def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
     # compute the theoretical accuracy
@@ -76,11 +81,16 @@ def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
 
 if __name__ == '__main__':
     epsilon = 1
-    robust_rectangle = robust_rect_rf()
+    robust_rectangle, robust_radius_time = robust_rect_rf()
+
+    print(f"Robust radius computation time: {robust_radius_time * 1000:.3f}ms")
+    print("=================================")
+    print("Theoretical and empirical time comparison for epsilon")
+    print("=================================")
     for mechanism in ["pm", "exp", "laplace"]:
         start = time.perf_counter()
         theoretical_accuracy(epsilon, robust_rectangle, mechanism=mechanism)
         end = time.perf_counter()
-        print(f"{mechanism} theoretical time: {(end - start) * 1000:.6f}ms")
+        print(f"\033[32m{mechanism} theoretical time: {(end - start) * 1000:.6f}ms\033[0m")
         # empirical time
         empirical_accuracy(epsilon, sample_num=2000, mechanism=mechanism)

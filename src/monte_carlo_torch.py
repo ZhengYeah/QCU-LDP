@@ -104,13 +104,28 @@ class MonteCarloEstimator:
         for i in range(self.x.shape[0]):
             for j in range(self.x.shape[1]):
                 # sample from the three pieces with probabilities p / exp_val ** epsilon, p, p / exp_val ** epsilon
+                # If self.x is 0, then the first piece is [0, 0), which is empty, so we only sample from the second and third pieces
+                # If self.x is 1, we only sample from the first and second pieces
+                # Otherwise, we sample from all three pieces
                 samples[:, i, j] = torch.where(
-                    torch.rand(self.sample_num, device=self.x.device) < p / (p + 2 * p / exp_val ** epsilon),
-                    torch.rand(self.sample_num, device=self.x.device) * l[i, j],
+                    self.x[i, j] == 0,
+                    torch.where(torch.rand(self.sample_num, device=self.x.device) < p / (p + p / exp_val ** epsilon),
+                                torch.rand(self.sample_num, device=self.x.device) * (r[i, j] - l[i, j]) + l[i, j],
+                                torch.rand(self.sample_num, device=self.x.device) * (1 - r[i, j]) + r[i, j]),
                     torch.where(
-                        torch.rand(self.sample_num, device=self.x.device) < p / (p + 2 * p / exp_val ** epsilon),
-                        l[i, j] + torch.rand(self.sample_num, device=self.x.device) * (r[i, j] - l[i, j]),
-                        r[i, j] + torch.rand(self.sample_num, device=self.x.device) * (1 - r[i, j])
+                        self.x[i, j] == 1,
+                        torch.where(torch.rand(self.sample_num, device=self.x.device) < p / (p + p / exp_val ** epsilon),
+                                    torch.rand(self.sample_num, device=self.x.device) * (r[i, j] - l[i, j]) + l[i, j],
+                                    torch.rand(self.sample_num, device=self.x.device) * r[i, j]),
+                        torch.where(
+                            torch.rand(self.sample_num, device=self.x.device) < p / (p + 2 * p / exp_val ** epsilon),
+                            torch.rand(self.sample_num, device=self.x.device) * (r[i, j] - l[i, j]) + l[i, j],
+                            torch.where(
+                                torch.rand(self.sample_num, device=self.x.device) < p / (p + p / exp_val ** epsilon),
+                                torch.rand(self.sample_num, device=self.x.device) * l[i, j],
+                                torch.rand(self.sample_num, device=self.x.device) * (1 - r[i, j]) + r[i, j]
+                            )
+                        )
                     )
                 )
         return samples
@@ -166,7 +181,7 @@ class MonteCarloEstimator:
 
     def quantification_error_bound(self) -> float:
         volume = self.volume_of_robust_area()
-        samples = self.importance_sampling_pm(self.epsilon)
+        samples = self.samples_from_input_space()
         correct_samples = self.correct_samples(samples)
         pdfs_at_y = self.target_pdf_at_y_pm(correct_samples, self.epsilon)
         # The theoretical accuracy is the expected value of the PDF at the correct samples

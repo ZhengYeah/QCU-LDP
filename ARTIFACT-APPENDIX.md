@@ -121,7 +121,7 @@ will display the corresponding figures using matplotlib.
 
 Run the following command to reproduce Figure 4 in the paper (Page 7), which compares the robustness probability of different LDP mechanisms under different privacy parameters (epsilon) w.r.t. the concentration level (theta).
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_4.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_4.py
 ```
 
 #### Figure 6: Empirical and theoretical utility for two classifiers trained on the Stroke Prediction dataset
@@ -130,7 +130,7 @@ Run the following command to reproduce Figure 4 in the paper (Page 7), which com
 Run the following command to reproduce Figure 6 in the paper (Page 11), which compares the theoretical utility $\hat{\rho}(\varepsilon)$ and empirical utility $\rho(\varepsilon)$ for two classifiers trained on the Stroke Prediction dataset.
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_6.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_6.py
 ```
 
 #### Table 2: Time cost comparison.
@@ -139,7 +139,7 @@ Run the following command to reproduce Figure 6 in the paper (Page 11), which co
 Run the following command to reproduce Table 2 in the paper (Page 11), which compares the time cost of computing the theoretical utility and empirical utility.
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/table_2.py
+[PROJECT_ROOT]$ uv run ./reproduction/table_2.py
 ```
 
 Time cost in different environments may vary, but the theoretical utility should always be computed much faster than the empirical utility.
@@ -151,21 +151,21 @@ The following screenshot shows the time cost on our test environment:
 - Time: ≈1 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_7.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_7.py
 ```
 
 #### Figure 8: Empirical and theoretical utility for a Neural Network classifier trained on the MNIST-7×7 dataset
 - Time: ≈5 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_8.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_8.py
 ```
 
 #### Figure 9: Empirical and theoretical utility of other LDP mechanisms for two classifiers trained on the Stroke Prediction dataset
 - Time: ≈1 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_9.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_9.py
 ```
 
 #### Figure 11: Average-case and worst-case utility for the Logistic Regression classifier trained on the Stroke Prediction dataset
@@ -175,45 +175,45 @@ The following screenshot shows the time cost on our test environment:
 The average-case and worst-case utility are more complex. We need first generate all the data: 
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_11_data.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_11_data.py
 ```
 
 Then, the following command draw the figures:
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_11_draw.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_11_draw.py
 ```
 
 #### Figure 12: Average-case and worst-case utility for the Random Forest classifier trained on the Stroke Prediction dataset
 - Time: ≈30 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_12_data.py
-[PROJECT_ROOT] uv run ./reproduction/figure_12_draw.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_12_data.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_12_draw.py
 ```
 
 #### Figure 13: Average-case and worst-case utility for the Logistic Regression classifier trained on the Bank Customer Attrition dataset
 - Time: ≈20 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_13_data.py
-[PROJECT_ROOT] uv run ./reproduction/figure_13_draw.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_13_data.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_13_draw.py
 ```
 
 #### Figure 14: Average-case and worst-case utility for the Random Forest classifier trained on the Bank Customer Attrition dataset
 - Time: ≈30 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_14_data.py
-[PROJECT_ROOT] uv run ./reproduction/figure_14_draw.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_14_data.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_14_draw.py
 ```
 
 #### Figure 15: Average-case and worst-case utility for the Neural Network classifier trained on the MNIST-7×7 dataset
 - Time: ≈30 minutes
 
 ```bash
-[PROJECT_ROOT] uv run ./reproduction/figure_15_data.py
-[PROJECT_ROOT] uv run ./reproduction/figure_15_draw.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_15_data.py
+[PROJECT_ROOT]$ uv run ./reproduction/figure_15_draw.py
 ```
 
 

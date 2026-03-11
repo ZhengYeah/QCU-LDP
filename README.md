@@ -3,8 +3,8 @@
 Code for paper: [PETS'26] Quantifying Classifier Utility under Local Differential Privacy
 
 Contributions:
-- *(Quantification framework)* The first framework that provides analytical utility quantification for classifiers under LDP mechanisms. This framework bridges the concentration analysis of LDP mechanisms with the robustness analysis of classifiers, enabling systematic evaluation of utility.
-- *(Refinement techniques)* Two refinement techniques to enhance utility quantification. 
+- *(Quantification framework)* The first framework that provides analytical utility quantification for classifiers under LDP-perturbed inputs. This framework bridges the concentration analysis of LDP mechanisms with the robustness analysis of classifiers, enabling systematic evaluation of classifier utility.
+- *(Refinement techniques)* Two refinement techniques to enhance the utility quantification. 
 - *(Comparison and case studies)* Case studies on typical classifiers, including logistic regression, random forests, and neural networks, under various LDP mechanisms.
 
 <p align="center">

@@ -6,12 +6,12 @@ import pandas as pd
 import joblib
 
 # private features: age (index 0), bmi (index 5), be cautious about the index
-user_row = [0.79,1.0,0.0,1.0,0.5804,0.48]
 private_ind_1, private_ind_2 = 0, 5
 data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
-model = joblib.load('classifiers/stroke_rf.pkl')
+model = joblib.load('../experiments/stroke_pred/classifiers/stroke_rf.pkl')
 
 def robust_rect_rf(x_dataframe):
+    # note: x_dataframe = pd.DataFrame(data=[user_row], columns=data_columns)
     robust_rec = RobustRadiusSKLearn(model, x_dataframe, ['age','bmi'], 0.05, 0.03)
     radius = robust_rec.binary_search()
     robust_rectangle = robust_rec.adjust_step_rate([(0.4, 0.5), (0.3, 0.5), (0.2, 0.5)])
@@ -19,6 +19,7 @@ def robust_rect_rf(x_dataframe):
     return robust_rectangle
 
 def theoretical_accuracy(private_values, epsilon, robust_rectangle, mechanism="pm"):
+    # only need the private values in the user_row
     # compute the theoretical accuracy
     prob_accumulated = 1
     for i, private_value in enumerate(private_values):
@@ -28,8 +29,8 @@ def theoretical_accuracy(private_values, epsilon, robust_rectangle, mechanism="p
         prob_accumulated *= cdf_rect
     return prob_accumulated
 
-
-def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm"):
+def empirical_accuracy(user_row, epsilon, sample_num=3000, mechanism="pm"):
+    private_values = [user_row[private_ind_1], user_row[private_ind_2]]
     if mechanism == "laplace" or mechanism == "gaussian":
         samples, fail_num_laplace = samples_of_mechanism(private_values, sample_num, mechanism, epsilon)
     else:
@@ -57,29 +58,24 @@ def empirical_accuracy(private_values, epsilon, sample_num=3000, mechanism="pm")
 
 
 if __name__ == '__main__':
-    # form list for the age and bmi, combine them with the user_row
-    age_range, bmi_range = np.arange(0, 1, 0.1), np.arange(0, 1, 0.1)
-    user_other_row = [1.0, 0.0, 1.0, 0.5804]  # hypertension, heart_disease, ever_married, avg_glucose_level
-    # insert age and bmi into the user_other_row
-    user_row_list = []
-    for age in age_range:
-        for bmi in bmi_range:
-            tmp_row = [age] + user_other_row[:2] + user_other_row[2:4] + [bmi]
-            user_row_list.append(tmp_row)
-    assert user_row_list[0] == [0.0, 1.0, 0.0, 1.0, 0.5804, 0.0]
-
+    # load the processed stroke data, without index
+    df = pd.read_csv('../experiments/stroke_pred/classifiers/processed_stroke_data_normalized.csv')
+    df = df.iloc[:100].drop(columns=['stroke'])
     with open('rf_avg_wor.csv', 'w') as f:
         f.write('x_pv_1,x_pv_2,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')
-        for epsilon in range(1, 9):
-            for user_row in user_row_list:
-                x_df = pd.DataFrame(data=[user_row], columns=data_columns)
-                robust_rectangle = robust_rect_rf(x_df)
-                x_private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
-                # write the theoretical and empirical accuracy to csv file
+        # iterate each row in the dataframe
+        for user_row in df.values:
+            # form a dataframe for the user_row
+            x_df = pd.DataFrame(data=[user_row], columns=data_columns)
+            robust_rectangle = robust_rect_rf(x_df)
+            x_private_values = [user_row[private_ind_1], user_row[private_ind_2]]
+            # write the theoretical and empirical accuracy to csv file
+            for epsilon in range(1, 9):
                 f.write(f'{x_private_values[0]:.2f},{x_private_values[1]:.2f}')
                 f.write(f',{epsilon}')
                 for mechanism in ["pm", "sw", "krr", "exp", "laplace", "gaussian"]:
                     prob_accumulated = theoretical_accuracy(x_private_values, epsilon, robust_rectangle, mechanism=mechanism)
-                    accuracy = empirical_accuracy(x_private_values, epsilon, sample_num=6000, mechanism=mechanism)
+                    accuracy = empirical_accuracy(user_row, epsilon, sample_num=3000, mechanism=mechanism)
                     f.write(f',{prob_accumulated:.6f},{accuracy:.3f}')
                 f.write('\n')
+

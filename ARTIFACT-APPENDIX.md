@@ -53,7 +53,7 @@ GitHub repository: https://github.com/ZhengYeah/QCU-LDP
 
 ### Set up the environment
 
-**Install UV package manager.** This project is packaged by `uv`, a modern Python package management system similar to `miniconda` or `poetry`. You can install `uv` by following the instructions on their official website: https://docs.astral.sh/uv/.
+**Install UV package manager.** This project is packaged by `uv`, a modern Python package management system similar to `miniconda` or `poetry`. You can install `uv` by following the instructions on their official website: https://docs.astral.sh/uv/. (Remember to add `uv` to yout PATH.)
 
 **Clone the repository.** You can clone the repository using the following command:
 ```bash

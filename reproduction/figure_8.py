@@ -1,9 +1,17 @@
-from src.robust_radius_torch import RobustRadiusTorch
-from src.samples_from_mechanism import samples_of_mechanism
-from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import numpy as np
 import torch
 import torch.nn as nn
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent)) # Add the parent directory to the system path to allow imports from src
+BASE_DIR = Path(__file__).resolve().parent.parent # Define the base directory for the project
+import matplotlib.pyplot as plt
+plt.rcParams['font.size'] = 20
+
+from src.robust_radius_torch import RobustRadiusTorch
+from src.samples_from_mechanism import samples_of_mechanism
+from src.cdf_ldp_mechanisms_at_x import CDFAtX
+
 
 class CNN(nn.Module):
     def __init__(self):
@@ -22,9 +30,9 @@ class CNN(nn.Module):
         x = self.fc2(x)
         return x
 
-model = torch.load('../experiments/mnist/cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
+model = torch.load(BASE_DIR / 'experiments/mnist/cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
 model.eval()
-private_image = np.load('../experiments/mnist/mnist_7_7_0.npy')
+private_image = np.load(BASE_DIR / 'experiments/mnist/mnist_7_7_0.npy')
 correct_class = model(torch.tensor(private_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
 
 def robust_rect():
@@ -88,8 +96,7 @@ for epsilon in epsilon_values:
         theoretical_accuracies[mechanism].append(0.1 + 0.9 * prob_accumulated)
         empirical_accuracies[mechanism].append(0.1 + 0.9 * accuracy)
 # plot the figure
-import matplotlib.pyplot as plt
-plt.rcParams['font.size'] = 20
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -110,63 +117,14 @@ plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon),\hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=18)
 plt.title('Figure 8(a)')
-plt.show()
 
 
 #########
 # Figure 8(b)
 #########
 
-private_image = np.load('../experiments/mnist/mnist_7_7_1.npy')
+private_image = np.load( BASE_DIR / 'experiments/mnist/mnist_7_7_1.npy')
 correct_class = model(torch.tensor(private_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
-
-def robust_rect():
-    x = torch.tensor(private_image, dtype=torch.float32)
-    robust_rec = RobustRadiusTorch(model, x, 0.05, 0.1)
-    radius = robust_rec.binary_search()
-    print(f"Robust radius: {radius}")
-    # founded_rec = robust_rec.adjust_step_rate([(0.04, 0.5), (0.04, 0.2), (0.03, 0.5), (0.03, 0.2)])
-    refined_rec = robust_rec.adjust_step_rate([(0.02, 0), (0.01, 0.1)])
-    # print(f"Founded robust rectangle: {founded_rec}")
-    print(f"Refined robust rectangle:\n{refined_rec[0]}\n{refined_rec[1]}")
-    return refined_rec
-
-def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
-    # compute the theoretical accuracy
-    prob_accumulated = 1
-    # shaper of the robust rectangle: (2, 7, 7)
-    assert robust_rectangle[0].shape == robust_rectangle[1].shape
-    for i in range (robust_rectangle[0].shape[0]):
-        for j in range (robust_rectangle[0].shape[1]):
-            rectangle = (robust_rectangle[0][i, j], robust_rectangle[1][i, j])
-            cdf_at_x = CDFAtX(epsilon, private_image[i, j], bin_num=100)
-            cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
-            cdf_rect = 1 if abs(1 - cdf_rect) < 1e-2 else cdf_rect
-            prob_accumulated *= cdf_rect
-    return prob_accumulated
-
-def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
-    flatten_private_image = private_image.flatten()
-    if mechanism == "laplace" or mechanism == "gaussian":
-        samples, fail_num = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
-    else:
-        samples = samples_of_mechanism(flatten_private_image, sample_num, mechanism, epsilon)
-    # process the merged dims
-    samples = torch.tensor(samples, dtype=torch.float32)
-    samples = samples.view(sample_num, private_image.shape[0], private_image.shape[1])
-    # unsqueeze the samples for CNN
-    samples = samples.unsqueeze(1).float()
-    with torch.no_grad():
-        pred = model(samples)
-    pred = pred.argmax(dim=1)
-    # ground truth
-    # calculate the empirical accuracy
-    correct_num = (pred == correct_class).sum().item()
-    if mechanism == "laplace" or mechanism == "gaussian":
-        accuracy = correct_num / (sample_num + fail_num)
-    else:
-        accuracy = correct_num / sample_num
-    return accuracy
 
 # draw the figure 8 and write the theoretical and empirical accuracy
 robust_rectangle = robust_rect()
@@ -181,8 +139,7 @@ for epsilon in epsilon_values:
         theoretical_accuracies[mechanism].append(0.1 + 0.9 * prob_accumulated)
         empirical_accuracies[mechanism].append(0.1 + 0.9 * accuracy)
 # plot the figure
-import matplotlib.pyplot as plt
-plt.rcParams['font.size'] = 20
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -204,5 +161,3 @@ plt.ylabel(r'$\rho(\varepsilon),\hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=18)
 plt.title('Figure 8(b)')
 plt.show()
-
-

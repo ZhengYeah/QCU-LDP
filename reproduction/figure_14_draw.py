@@ -2,10 +2,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-# Enable LaTeX interpreter
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman']
 plt.rcParams['font.size'] = 20
 
 df = pd.read_csv('rf_avg_wor.csv')
@@ -41,8 +37,7 @@ plt.fill_between(df["epsilon"], df["gaussian_theo"], df["gaussian_empirical"], c
 plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon), \hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=18)
-plt.show()
-
+plt.title('Figure 14a')
 
 # worst-case accuracy plot
 df = pd.read_csv('rf_avg_wor.csv')
@@ -58,6 +53,7 @@ df["gaussian_theo"] = df.groupby("epsilon")["gaussian_theo"].transform('min')
 df["gaussian_empirical"] = df.groupby("epsilon")["gaussian_empirical"].transform('min')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -78,4 +74,5 @@ plt.fill_between(df["epsilon"], df["gaussian_theo"], df["gaussian_empirical"], c
 plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon), \hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=18)
+plt.title('Figure 14b')
 plt.show()

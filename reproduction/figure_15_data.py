@@ -1,9 +1,16 @@
-from src.robust_radius_torch import RobustRadiusTorch
-from src.samples_from_mechanism import samples_of_mechanism
-from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import numpy as np
 import torch
 import torch.nn as nn
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent)) # Add the parent directory to the system path to allow imports from src
+BASE_DIR = Path(__file__).resolve().parent.parent # Define the base directory for the project
+import matplotlib.pyplot as plt
+plt.rcParams['font.size'] = 20
+
+from src.robust_radius_torch import RobustRadiusTorch
+from src.samples_from_mechanism import samples_of_mechanism
+from src.cdf_ldp_mechanisms_at_x import CDFAtX
 
 class CNN(nn.Module):
     def __init__(self):
@@ -22,7 +29,7 @@ class CNN(nn.Module):
         x = self.fc2(x)
         return x
 
-model = torch.load('../experiments/mnist/cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
+model = torch.load(BASE_DIR / 'experiments/mnist/cnn_mnist_7_7.pth', map_location=torch.device('cpu'), weights_only=False)
 model.eval()
 
 def robust_rect(private_image):
@@ -81,7 +88,7 @@ if __name__ == '__main__':
         # the first 10 images are used for the experiments
         for index_img in range(10):
             # change this to select a different image
-            pri_image = np.load(f'../experiments/mnist/mnist_7_7_{index_img}.npy')
+            pri_image = np.load(BASE_DIR / f'experiments/mnist/mnist_7_7_{index_img}.npy')
             correct_class = model(torch.tensor(pri_image).unsqueeze(0).unsqueeze(0).float()).argmax(dim=1)
 
             robust_rectangle = robust_rect(pri_image)

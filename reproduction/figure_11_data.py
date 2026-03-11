@@ -1,14 +1,21 @@
-from src.samples_from_mechanism import samples_of_mechanism
-from src.robust_radius_sklearn import RobustRadiusSKLearn
-from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import numpy as np
 import pandas as pd
 import joblib
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent)) # Add the parent directory to the system path to allow imports from src
+BASE_DIR = Path(__file__).resolve().parent.parent # Define the base directory for the project
+import matplotlib.pyplot as plt
+plt.rcParams['font.size'] = 20
+
+from src.samples_from_mechanism import samples_of_mechanism
+from src.robust_radius_sklearn import RobustRadiusSKLearn
+from src.cdf_ldp_mechanisms_at_x import CDFAtX
 
 # private features: age (index 0), bmi (index 5), be cautious about the index
 private_ind_1, private_ind_2 = 0, 5
 data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
-model = joblib.load('../experiments/stroke_pred/classifiers/stroke_lr.pkl')
+model = joblib.load(BASE_DIR / 'experiments/stroke_pred/classifiers/stroke_lr.pkl')
 
 def robust_rect_rf(x_dataframe):
     # note: x_dataframe = pd.DataFrame(data=[user_row], columns=data_columns)
@@ -59,7 +66,7 @@ def empirical_accuracy(user_row, epsilon, sample_num=3000, mechanism="pm"):
 
 if __name__ == '__main__':
     # load the processed stroke data, without index
-    df = pd.read_csv('../experiments/stroke_pred/classifiers/processed_stroke_data_normalized.csv')
+    df = pd.read_csv(BASE_DIR / 'experiments/stroke_pred/classifiers/processed_stroke_data_normalized.csv')
     df = df.iloc[:100].drop(columns=['stroke'])
     with open('lr_avg_wor.csv', 'w') as f:
         f.write('x_pv_1,x_pv_2,epsilon,pm_theo,pm_empirical,sw_theo,sw_empirical,krr_theo,krr_empirical,exp_theo,exp_empirical,laplace_theo,laplace_empirical,gaussian_theo,gaussian_empirical\n')

@@ -15,6 +15,7 @@ df["laplace_theo"] = df.groupby("epsilon")["laplace_theo"].transform('mean')
 df["laplace_empirical"] = df.groupby("epsilon")["laplace_empirical"].transform('mean')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -48,6 +49,7 @@ df["laplace_theo"] = df.groupby("epsilon")["laplace_theo"].transform('min')
 df["laplace_empirical"] = df.groupby("epsilon")["laplace_empirical"].transform('min')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)

@@ -1,10 +1,15 @@
-from src.samples_from_mechanism import samples_of_mechanism
-from src.robust_radius_sklearn import RobustRadiusSKLearn
-from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import numpy as np
 import pandas as pd
 import joblib
 import time
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent)) # Add the parent directory to the system path to allow imports from src
+BASE_DIR = Path(__file__).resolve().parent.parent # Define the base directory for the project
+
+from src.samples_from_mechanism import samples_of_mechanism
+from src.robust_radius_sklearn import RobustRadiusSKLearn
+from src.cdf_ldp_mechanisms_at_x import CDFAtX
 
 # private features: age (index 0), bmi (index 5), be cautious about the index
 # choose a user from the dataset as x
@@ -14,7 +19,7 @@ private_ind_1, private_ind_2 = 0, 5
 private_values = [user_row[private_ind_1], user_row[private_ind_2]] # age, bmi
 data_columns = ['age', 'hypertension', 'heart_disease', 'ever_married', 'avg_glucose_level', 'bmi']
 x_df = pd.DataFrame(data=[user_row], columns=data_columns)
-model = joblib.load('../experiments/stroke_pred/classifiers/stroke_lr.pkl')
+model = joblib.load(BASE_DIR / 'experiments/stroke_pred/classifiers/stroke_lr.pkl')
 
 # time variables
 empirical_sampling_time = 0

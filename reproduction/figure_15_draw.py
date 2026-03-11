@@ -2,10 +2,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-# Enable LaTeX interpreter
-plt.rcParams['text.usetex'] = True
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman']
 plt.rcParams['font.size'] = 20
 
 df = pd.read_csv('cnn_avg_wor_accuracy.csv')
@@ -21,6 +17,7 @@ df["krr_theo"] = df.groupby("epsilon")["krr_theo"].transform('mean')
 df["krr_empirical"] = df.groupby("epsilon")["krr_empirical"].transform('mean')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -40,7 +37,7 @@ plt.fill_between(df["epsilon"], 0.1 + 0.9 * df["krr_theo"], 0.1 + 0.9 * df["krr_
 plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon), \hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=15, loc='upper left')
-plt.show()
+plt.title('Figure 15a')
 
 
 # worst-case accuracy
@@ -57,6 +54,7 @@ df["krr_theo"] = df.groupby("epsilon")["krr_theo"].transform('min')
 df["krr_empirical"] = df.groupby("epsilon")["krr_empirical"].transform('min')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -76,4 +74,5 @@ plt.fill_between(df["epsilon"], 0.1 + 0.9 * df["krr_theo"], 0.1 + 0.9 * df["krr_
 plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon), \hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=15, loc='upper left')
+plt.title('Figure 15b')
 plt.show()

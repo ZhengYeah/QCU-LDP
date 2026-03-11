@@ -17,6 +17,7 @@ df["gaussian_theo"] = df.groupby("epsilon")["gaussian_theo"].transform('mean')
 df["gaussian_empirical"] = df.groupby("epsilon")["gaussian_empirical"].transform('mean')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)
@@ -38,7 +39,6 @@ plt.xlabel(r'Privacy parameter $\varepsilon$')
 plt.ylabel(r'$\rho(\varepsilon), \hat{\rho}(\varepsilon)$')
 plt.legend(fontsize=18)
 plt.title('Figure 13a')
-plt.show()
 
 
 # worst-case accuracy plot
@@ -55,6 +55,7 @@ df["gaussian_theo"] = df.groupby("epsilon")["gaussian_theo"].transform('min')
 df["gaussian_empirical"] = df.groupby("epsilon")["gaussian_empirical"].transform('min')
 df = df.drop_duplicates(subset=["epsilon"])
 
+plt.figure()
 for spine in plt.gca().spines.values():
     spine.set_linewidth(1)
 plt.ylim(0, 1)

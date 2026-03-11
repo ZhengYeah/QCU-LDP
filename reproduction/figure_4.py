@@ -1,7 +1,13 @@
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from src.cdf_ldp_mechanisms_at_x import CDFAtX
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+
+
 
 # Enable LaTeX interpreter
 plt.rcParams['font.size'] = 20
@@ -59,7 +65,7 @@ plt.xlabel(r'$\theta$')
 plt.ylabel(r'$\rho(\varepsilon, \theta)$')
 plt.legend()
 plt.title('Figure 4(a)')
-plt.show()
+# plt.show()
 
 epsilon = 4
 theta, pm_concentration_probability, laplace_concentration_probability, sw_concentration_probability, exp_concentration_probability, exp_krr_concentration_probability = concentration_probability(epsilon, x)
@@ -81,7 +87,7 @@ plt.xlabel(r'$\theta$')
 plt.ylabel(r'$\rho(\varepsilon, \theta)$')
 plt.legend()
 plt.title('Figure 4(b)')
-plt.show()
+# plt.show()
 
 epsilon = 6
 theta, pm_concentration_probability, laplace_concentration_probability, sw_concentration_probability, exp_concentration_probability, exp_krr_concentration_probability = concentration_probability(epsilon, x)

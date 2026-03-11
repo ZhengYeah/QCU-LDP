@@ -8,7 +8,7 @@ Contributions:
 - *(Comparison and case studies)* Case studies on typical classifiers, including logistic regression, random forests, and neural networks, under various LDP mechanisms.
 
 <p align="center">
-    <img src="/others/readme_poster.png" alt="Framework Overview" width="800"/>
+    <img src="/others/readme_poster.png" alt="Framework Overview" width="600"/>
 </p>
 
 ## Reproduction

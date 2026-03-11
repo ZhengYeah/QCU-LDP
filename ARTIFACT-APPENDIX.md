@@ -221,15 +221,12 @@ Then, after finishing the above script, you can run the following command draw t
 
 ### Limitations
 
-LDP mechanisms introduce randomness through sampling, which may cause slight variations in results across different runs. However, the overall trends should remain consistent with the figures reported in the paper.
+LDP mechanisms introduce randomness through sampling, which may cause slight variations in results across different runs (even after averaging). However, the overall trends should remain consistent with the figures reported in the paper.
 
 
 ## Notes on Reusability
 
 The codebase is modular, with building blocks in `src` folder and case studies in `experiments` folder. The theoretical utility follows the following code structure:
-Here's a polished version of the section:
-
-The theoretical utility computation follows this modular structure:
 
 ```python
 def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):

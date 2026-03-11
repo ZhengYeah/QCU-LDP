@@ -43,7 +43,7 @@ The software requirements for running the artifact include:
 The estimated time and storage consumption for running the artifact are as follows:
 
 - The overall human and compute times required to run the artifact: Approximately 5 mins for setup and 2.5 hours for running all experiments.
-- The overall disk space consumed by the artifact: Approximately 1.5GB, including the codebase, dependencies, and datasets.
+- The overall disk space consumed by the artifact: Approximately 2GB, including the codebase, dependencies, and datasets.
 
 ## Environment
 
@@ -178,7 +178,7 @@ The average-case and worst-case utility are more complex. We need first generate
 [PROJECT_ROOT]$ uv run ./reproduction/figure_11_data.py
 ```
 
-Then, the following command draw the figures:
+Then, after finishing the above script, you can run the following command draw the figures:
 
 ```bash
 [PROJECT_ROOT]$ uv run ./reproduction/figure_11_draw.py

@@ -35,6 +35,7 @@ The software requirements for running the artifact include:
 2. Artifact packaging: The artifact is a Python project packaged with `uv`.
 3. Python version: The artifact is tested with Python 3.13.
 4. Dependencies: All dependencies are listed in the `pyproject.toml` file, which can be installed using `uv`. (Will be detailed later.)
+We use matplotlib for plotting, which requires a display environment. The virtual machines provided by PETS may not have a display environment, so we recommend running the artifact on your local machine (Windows or WSL or Linux). 
 5. Machine learning models: The artifact includes implementations of logistic regression, random forests, and neural networks. These models are included in the codebase and do not require additional software to run.
 6. Dataset: The artifact includes `stroke_pred`, `bank_attrition`, and `mnist` datasets, which are included in the repository and do not require additional software to access.
 

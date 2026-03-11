@@ -1,4 +1,4 @@
-# BoundClassifier-LDP
+# QCU-LDP
 
 Code for paper: [PETS'26] Quantifying Classifier Utility under Local Differential Privacy
 

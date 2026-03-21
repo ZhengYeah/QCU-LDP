@@ -220,8 +220,6 @@ Then, after finishing the above script, you can run the following command draw t
 
 ## Limitations
 
-### Limitations
-
 LDP mechanisms introduce randomness through sampling, which may cause slight variations in results across different runs (even after averaging). However, the overall trends should remain consistent with the figures reported in the paper.
 
 

@@ -3,8 +3,8 @@
 Paper title: **Quantifying Classifier Utility under Local Differential Privacy**
 
 Requested Badge(s):
-  - [ ] **Available**
-  - [ ] **Functional**
+  - [x] **Available**
+  - [x] **Functional**
   - [x] **Reproduced**
 
 ## Description
@@ -97,18 +97,20 @@ The proposed theoretical utility bound can be computed analytically with low tim
 
 The `reproduction` folder contains scripts to reproduce all results in the paper. 
 ```
-|- reproduction
-  |- figure_4.py: Figure 4 (Page 7)  (≈5 seconds)
-  |- figure_6.py: Figure 6 (Page 11)  (≈2 minutes)
-  |- table_2.py: Table 2 (Page 11)  (≈5 seconds)
-  |- figure_7.py: Figure 7 (Page 12)  (≈1 minutes)
-  |- figure_8.py: Figure 8 (Page 12)  (≈5 minutes)
-  |- figure_9.py: Figure 9 (Page 20)  (≈1 minutes)
-  |- figure_11_data.py & figure_11_draw.py: Figure 11 (Page 20)  (≈20 minutes)
-  |- figure_12_data.py & figure_12_draw.py: Figure 12 (Page 20)  (≈30 minutes)
-  |- figure_13_data.py & figure_13_draw.py: Figure 13 (Page 21)  (≈20 minutes)
-  |- figure_14_data.py & figure_14_draw.py: Figure 14 (Page 21)  (≈30 minutes)
-  |- figure_15_data.py & figure_15_draw.py: Figure 15 (Page 22)  (≈30 minutes)
+QCU-LDP/ (project root)
+├── reproduction/
+│   ├── figure_4.py: Figure 4 (Page 7)  (≈5 seconds)
+│   ├── figure_6.py: Figure 6 (Page 11)  (≈2 minutes)
+│   ├── table_2.py: Table 2 (Page 11)  (≈5 seconds)
+│   ├── figure_7.py: Figure 7 (Page 12)  (≈1 minute)
+│   ├── figure_8.py: Figure 8 (Page 12)  (≈5 minutes)
+│   ├── figure_9.py: Figure 9 (Page 20)  (≈1 minute)
+│   ├── figure_10.py: Figure 10 (Page 20)  (≈5 seconds)
+│   ├── figure_11_data.py & figure_11_draw.py: Figure 11 (Page 20)  (≈20 minutes)
+│   ├── figure_12_data.py & figure_12_draw.py: Figure 12 (Page 20)  (≈30 minutes)
+│   ├── figure_13_data.py & figure_13_draw.py: Figure 13 (Page 21)  (≈20 minutes)
+│   ├── figure_14_data.py & figure_14_draw.py: Figure 14 (Page 21)  (≈30 minutes)
+│   ├── figure_15_data.py & figure_15_draw.py: Figure 15 (Page 22)  (≈30 minutes)
 ```
 To reproduce the results, run the scripts in the `reproduction` folder using `uv run`. You don't need to manually activate a virtual environment, but ensure you're not already inside one. For example:
 
@@ -149,7 +151,7 @@ The following screenshot shows the time cost on our test environment:
 ![2026-03-11_123435](./others/table_2_screenshot.png)
 
 #### Figure 7: Empirical and theoretical utility for two classifiers trained on the Stroke Prediction dataset
-- Time: ≈1 minutes
+- Time: ≈1 minute
 
 ```bash
 [PROJECT_ROOT]$ uv run ./reproduction/figure_7.py
@@ -163,10 +165,17 @@ The following screenshot shows the time cost on our test environment:
 ```
 
 #### Figure 9: Empirical and theoretical utility of other LDP mechanisms for two classifiers trained on the Stroke Prediction dataset
-- Time: ≈1 minutes
+- Time: ≈1 minute
 
 ```bash
 [PROJECT_ROOT]$ uv run ./reproduction/figure_9.py
+```
+
+#### Figure 10: Projected decision boundary of the Logistic Regression classifier and the Random Forest classifier
+- Time: ≈5 seconds
+
+```bash
+[PROJECT_ROOT]$ uv run ./reproduction/figure_10.py
 ```
 
 #### Figure 11: Average-case and worst-case utility for the Logistic Regression classifier trained on the Stroke Prediction dataset
@@ -217,11 +226,9 @@ Then, after finishing the above script, you can run the following command draw t
 [PROJECT_ROOT]$ uv run ./reproduction/figure_15_draw.py
 ```
 
-
 ## Limitations
 
 LDP mechanisms introduce randomness through sampling, which may cause slight variations in results across different runs (even after averaging). However, the overall trends should remain consistent with the figures reported in the paper.
-
 
 ## Notes on Reusability
 

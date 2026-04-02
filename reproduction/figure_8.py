@@ -57,7 +57,7 @@ def theoretical_accuracy(epsilon, robust_rectangle, mechanism="pm"):
             cdf_at_x = CDFAtX(epsilon, private_image[i, j], bin_num=100)
             cdf_rect = cdf_at_x.cdf_of_tilde_x(rectangle, mechanism)
             cdf_rect = 1 if abs(1 - cdf_rect) < 1e-2 else cdf_rect
-            prob_accumulated *= cdf_rect
+            prob_accumulated = prob_accumulated * cdf_rect * 0.99 # term (1 - \tau) in the paper, we set tau to 0.01
     return prob_accumulated
 
 def empirical_accuracy(epsilon, sample_num=3000, mechanism="pm"):
